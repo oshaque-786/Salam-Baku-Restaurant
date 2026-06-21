@@ -1,0 +1,40 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global lock
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reservation validation
+    function isValidReservation(data) {
+      return data.keys().hasAll(['fullName', 'phoneNumber', 'date', 'time', 'guests', 'status', 'createdAt']) &&
+        data.keys().size() == 7 &&
+        data.fullName is string && data.fullName.size() >= 1 && data.fullName.size() <= 100 &&
+        data.phoneNumber is string && data.phoneNumber.size() >= 5 && data.phoneNumber.size() <= 20 &&
+        data.date is string && data.date.size() >= 8 && data.date.size() <= 20 &&
+        data.time is string && data.time.size() >= 4 && data.time.size() <= 10 &&
+        data.guests is number && data.guests >= 1 && data.guests <= 60 &&
+        data.status == 'pending' &&
+        data.createdAt == request.time; // request.time is a Firestore Timestamp
+    }
+
+    function isStaff() {
+      return request.auth != null && (request.auth.token.email == 'info@salambaku.az' || request.auth.token.email == 'admin@salambaku.az' || request.auth.token.email == 'sbr-foods@gmail.com');
+    }
+
+    match /reservations/{reservationId} {
+      // Anyone can create a reservation if it matches the exact schema constraints
+      allow create: if isValidReservation(request.resource.data);
+      
+      // Staff can read and manage reservations
+      allow read, update, delete: if isStaff();
+    }
+
+    match /settings/{docId} {
+      allow read: if true;
+      allow write: if isStaff();
+    }
+  }
+}

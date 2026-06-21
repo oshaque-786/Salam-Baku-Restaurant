@@ -1,0 +1,43 @@
+{
+  "entities": {
+    "Reservation": {
+      "title": "Reservation",
+      "description": "A table reservation submitted by a customer.",
+      "type": "object",
+      "properties": {
+        "fullName": {
+          "type": "string"
+        },
+        "phoneNumber": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "time": {
+          "type": "string"
+        },
+        "guests": {
+          "type": "number"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "confirmed", "cancelled"]
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp"
+        }
+      },
+      "required": ["fullName", "phoneNumber", "date", "time", "guests", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "reservations": {
+      "schema": {
+        "$ref": "#/entities/Reservation"
+      },
+      "description": "Collection storing all table reservations."
+    }
+  }
+}
