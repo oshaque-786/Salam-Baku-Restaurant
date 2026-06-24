@@ -32,7 +32,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `h-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}highlights/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/highlights/${num}.jpg`,
       alt: `Highlight ${num}`,
       category: 'Highlights' as MenuCategory
     };
@@ -42,7 +42,7 @@ const mediaItems: MediaItem[] = [
   {
     id: 'l-salam-baku',
     type: 'image' as MediaType,
-    src: `${import.meta.env.BASE_URL}latest/Salam Baku Thumbnail.png`,
+    src: `/Salam-Baku-Restaurant/latest/Salam Baku Thumbnail.png`,
     alt: 'Salam Baku Thumbnail',
     category: 'Latest' as MenuCategory
   },
@@ -51,7 +51,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `l-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}latest/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/latest/${num}.jpg`,
       alt: `Latest ${num}`,
       category: 'Latest' as MenuCategory
     };
@@ -64,7 +64,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `m-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}menu/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/menu/${num}.jpg`,
       alt: `Menu ${num}`,
       category: 'Menu' as MenuCategory
     };
@@ -76,7 +76,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `v-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}vibe/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/vibe/${num}.jpg`,
       alt: `Vibe ${num}`,
       category: 'Vibe' as MenuCategory
     };
@@ -89,7 +89,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `fd-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}food-drinks/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/food-drinks/${num}.jpg`,
       alt: `Food & Drinks ${num}`,
       category: 'Food & Drinks' as MenuCategory
     };
@@ -101,7 +101,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `k-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}kebab/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/kebab/${num}.jpg`,
       alt: `Kebab ${num}`,
       category: 'Kebab' as MenuCategory
     };
@@ -113,7 +113,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `p-auto-${num}`,
       type: 'image' as MediaType,
-      src: `${import.meta.env.BASE_URL}paratha/${num}.jpg`,
+      src: `/Salam-Baku-Restaurant/paratha/${num}.jpg`,
       alt: `Paratha ${num}`,
       category: 'Paratha' as MenuCategory
     };
