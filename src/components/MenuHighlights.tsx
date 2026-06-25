@@ -46,20 +46,17 @@ const mediaItems: MediaItem[] = [
     alt: 'Salam Baku Thumbnail',
     category: 'Latest' as MenuCategory
   },
-  ...Array.from({ length: 30 }, (_, i) => {
-    const num = String(i + 1).padStart(2, '0');
-    return {
-      id: `l-auto-${num}`,
-      type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/latest/${num}.jpg`,
-      alt: `Latest ${num}`,
-      category: 'Latest' as MenuCategory
-    };
-  }),
+  // --- LATEST ---
+{
+  id: 'l-salam-baku',
+  type: 'image' as MediaType,
+  src: `/Salam-Baku-Restaurant/latest/Salam Baku Thumbnail.png`,
+  alt: 'Salam Baku Thumbnail',
+  category: 'Latest' as MenuCategory
+},
 
   // --- MENU ---
-  // Menus generated up to 28 as per public/menu/README.md
-  ...Array.from({ length: 28 }, (_, i) => {
+...Array.from({ length: 12 }, (_, i) => {
     const num = String(i + 1).padStart(2, '0');
     return {
       id: `m-auto-${num}`,
