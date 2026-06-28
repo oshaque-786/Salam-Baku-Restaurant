@@ -32,7 +32,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `h-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/highlights/${num}.jpg`,
+      src: `/highlights/${num}.jpg`,
       alt: `Highlight ${num}`,
       category: 'Highlights' as MenuCategory
     };
@@ -42,26 +42,29 @@ const mediaItems: MediaItem[] = [
   {
     id: 'l-salam-baku',
     type: 'image' as MediaType,
-    src: `/Salam-Baku-Restaurant/latest/Salam Baku Thumbnail.png`,
+    src: '/latest/Salam Baku Thumbnail.png',
     alt: 'Salam Baku Thumbnail',
     category: 'Latest' as MenuCategory
   },
-  // --- LATEST ---
-{
-  id: 'l-salam-baku',
-  type: 'image' as MediaType,
-  src: `/Salam-Baku-Restaurant/latest/Salam Baku Thumbnail.png`,
-  alt: 'Salam Baku Thumbnail',
-  category: 'Latest' as MenuCategory
-},
+  ...Array.from({ length: 30 }, (_, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    return {
+      id: `l-auto-${num}`,
+      type: 'image' as MediaType,
+      src: `/latest/${num}.jpg`,
+      alt: `Latest ${num}`,
+      category: 'Latest' as MenuCategory
+    };
+  }),
 
   // --- MENU ---
-...Array.from({ length: 12 }, (_, i) => {
+  // Menus generated up to 28 as per public/menu/README.md
+  ...Array.from({ length: 28 }, (_, i) => {
     const num = String(i + 1).padStart(2, '0');
     return {
       id: `m-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/menu/${num}.jpg`,
+      src: `/menu/${num}.jpg`,
       alt: `Menu ${num}`,
       category: 'Menu' as MenuCategory
     };
@@ -73,7 +76,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `v-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/vibe/${num}.jpg`,
+      src: `/vibe/${num}.jpg`,
       alt: `Vibe ${num}`,
       category: 'Vibe' as MenuCategory
     };
@@ -86,7 +89,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `fd-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/food-drinks/${num}.jpg`,
+      src: `/food-drinks/${num}.jpg`,
       alt: `Food & Drinks ${num}`,
       category: 'Food & Drinks' as MenuCategory
     };
@@ -98,7 +101,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `k-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/kebab/${num}.jpg`,
+      src: `/kebab/${num}.jpg`,
       alt: `Kebab ${num}`,
       category: 'Kebab' as MenuCategory
     };
@@ -110,7 +113,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `p-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/Salam-Baku-Restaurant/paratha/${num}.jpg`,
+      src: `/paratha/${num}.jpg`,
       alt: `Paratha ${num}`,
       category: 'Paratha' as MenuCategory
     };
