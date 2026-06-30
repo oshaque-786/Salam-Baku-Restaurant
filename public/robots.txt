@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://oshaque-786.github.io/Salam-Baku-Restaurant/sitemap.xml
