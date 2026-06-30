@@ -35,13 +35,12 @@ const mediaItems: MediaItem[] = [
       category: 'Highlights' as MenuCategory,
     };
   }),
-];
 
   // --- LATEST ---
   {
     id: 'l-salam-baku',
     type: 'image' as MediaType,
-    src: `${import.meta.env.BASE_URL}latest/${num}.jpg`,
+    src: `${import.meta.env.BASE_URL}latest/Salam Baku Thumbnail.png`,
     alt: 'Salam Baku Thumbnail',
     category: 'Latest' as MenuCategory
   },
@@ -123,7 +122,6 @@ const mediaItems: MediaItem[] = [
   
   // --- STREET VIEW & 360° ---
   // { id: '360view', type: 'iframe', src: 'https://www.google.com/maps/embed?...', alt: '360 degree view', category: 'Street View & 360°' }
-];
 
 export default function MenuHighlights() {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
