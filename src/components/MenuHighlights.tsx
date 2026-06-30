@@ -41,7 +41,7 @@ const mediaItems: MediaItem[] = [
   {
     id: 'l-salam-baku',
     type: 'image' as MediaType,
-    src: '/latest/Salam Baku Thumbnail.png',
+    src: `${import.meta.env.BASE_URL}latest/${num}.jpg`,
     alt: 'Salam Baku Thumbnail',
     category: 'Latest' as MenuCategory
   },
@@ -63,7 +63,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `m-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/menu/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}menu/${num}.jpg`,
       alt: `Menu ${num}`,
       category: 'Menu' as MenuCategory
     };
@@ -75,7 +75,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `v-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/vibe/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}vibe/${num}.jpg`,
       alt: `Vibe ${num}`,
       category: 'Vibe' as MenuCategory
     };
@@ -88,7 +88,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `fd-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/food-drinks/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}food-drinks/${num}.jpg`,
       alt: `Food & Drinks ${num}`,
       category: 'Food & Drinks' as MenuCategory
     };
@@ -100,7 +100,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `k-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/kebab/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}kebab/${num}.jpg`,
       alt: `Kebab ${num}`,
       category: 'Kebab' as MenuCategory
     };
@@ -112,7 +112,7 @@ const mediaItems: MediaItem[] = [
     return {
       id: `p-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/paratha/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}paratha/${num}.jpg`,
       alt: `Paratha ${num}`,
       category: 'Paratha' as MenuCategory
     };
