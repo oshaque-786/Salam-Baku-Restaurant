@@ -24,19 +24,18 @@ export interface MediaItem {
 
 const mediaItems: MediaItem[] = [
   // --- HIGHLIGHTS ---
-  // We automatically generate 16 image placeholders here for your Highlights category.
-  // Upload your 16 images to a new folder called "public/highlights/" 
-  // and name them "01.jpg", "02.jpg", "03.jpg", etc., up to "16.jpg".
   ...Array.from({ length: 16 }, (_, i) => {
     const num = String(i + 1).padStart(2, '0');
+
     return {
       id: `h-auto-${num}`,
       type: 'image' as MediaType,
-      src: `/highlights/${num}.jpg`,
+      src: `${import.meta.env.BASE_URL}highlights/${num}.jpg`,
       alt: `Highlight ${num}`,
-      category: 'Highlights' as MenuCategory
+      category: 'Highlights' as MenuCategory,
     };
   }),
+];
 
   // --- LATEST ---
   {
