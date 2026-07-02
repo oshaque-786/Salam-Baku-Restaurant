@@ -1,0 +1,4 @@
+Contact: mailto:info@salambaku.az
+Expires: 2027-12-31T23:59:59Z
+Preferred-Languages: en
+Canonical: https://oshaque-786.github.io/Salam-Baku-Restaurant/security.txt
