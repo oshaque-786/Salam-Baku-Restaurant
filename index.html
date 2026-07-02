@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
+
   <meta charset="UTF-8" />
 
   <meta
@@ -42,6 +43,14 @@
     href="https://oshaque-786.github.io/Salam-Baku-Restaurant/"
   />
 
+  <!-- Hero Image Preload -->
+  <link
+    rel="preload"
+    as="image"
+    href="/Salam-Baku-Restaurant/hero/hero.webp"
+    fetchpriority="high"
+  />
+
   <!-- Open Graph -->
 
   <meta property="og:type" content="website" />
@@ -63,7 +72,7 @@
 
   <meta
     property="og:image"
-    content="https://oshaque-786.github.io/Salam-Baku-Restaurant/og-image.jpg"
+    content="https://oshaque-786.github.io/Salam-Baku-Restaurant/hero/hero.webp"
   />
 
   <meta
@@ -90,43 +99,44 @@
 
   <meta
     name="twitter:image"
-    content="https://oshaque-786.github.io/Salam-Baku-Restaurant/og-image.jpg"
+    content="https://oshaque-786.github.io/Salam-Baku-Restaurant/hero/hero.webp"
   />
 
-  <script type="module" src="/src/main.tsx"></script>
-<script type="application/ld+json">
+  <!-- Restaurant Schema -->
+
+  <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "Restaurant",
-  "@id": "https://oshaque-786.github.io/Salam-Baku-Restaurant/#restaurant",
-  "name": "Salam Baku Restaurant",
-  "url": "https://oshaque-786.github.io/Salam-Baku-Restaurant/",
-  "telephone": "+994502021166",
-  "email": "info@salambaku.az",
-  "servesCuisine": [
+  "@context":"https://schema.org",
+  "@type":"Restaurant",
+  "@id":"https://oshaque-786.github.io/Salam-Baku-Restaurant/#restaurant",
+  "name":"Salam Baku Restaurant",
+  "url":"https://oshaque-786.github.io/Salam-Baku-Restaurant/",
+  "telephone":"+994502021166",
+  "email":"info@salambaku.az",
+  "image":"https://oshaque-786.github.io/Salam-Baku-Restaurant/hero/hero.webp",
+  "logo":"https://oshaque-786.github.io/Salam-Baku-Restaurant/logo.png",
+  "priceRange":"$$",
+  "servesCuisine":[
     "Azerbaijani",
     "Middle Eastern",
     "Halal"
   ],
-  "priceRange": "$$",
-  "image": "https://oshaque-786.github.io/Salam-Baku-Restaurant/hero.jpg",
-  "logo": "https://oshaque-786.github.io/Salam-Baku-Restaurant/logo.png",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "Unvan",
-    "addressLocality": "Baku",
-    "postalCode": "AZ1000",
-    "addressCountry": "AZ"
+  "address":{
+    "@type":"PostalAddress",
+    "streetAddress":"Unvan",
+    "addressLocality":"Baku",
+    "postalCode":"AZ1000",
+    "addressCountry":"AZ"
   },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": "40.4093",
-    "longitude": "49.8671"
+  "geo":{
+    "@type":"GeoCoordinates",
+    "latitude":"40.4093",
+    "longitude":"49.8671"
   },
-  "openingHoursSpecification": [
+  "openingHoursSpecification":[
     {
-      "@type": "OpeningHoursSpecification",
-      "dayOfWeek": [
+      "@type":"OpeningHoursSpecification",
+      "dayOfWeek":[
         "Monday",
         "Tuesday",
         "Wednesday",
@@ -135,18 +145,22 @@
         "Saturday",
         "Sunday"
       ],
-      "opens": "10:00",
-      "closes": "23:00"
+      "opens":"10:00",
+      "closes":"23:00"
     }
   ],
-  "sameAs": [],
-  "hasMap": "https://maps.app.goo.gl/hgEPWzykDcoCggMf6"
+  "hasMap":"https://maps.app.goo.gl/hgEPWzykDcoCggMf6",
+  "sameAs":[]
 }
-</script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>
+  </script>
 
+</head>
+
+<body>
+
+  <div id="root"></div>
+
+  <script type="module" src="/src/main.tsx"></script>
+
+</body>
+</html>

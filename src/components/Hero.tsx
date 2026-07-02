@@ -64,8 +64,13 @@ export default function Hero() {
             {/* Main feature image - A clear Biryani image */}
             <div className="relative rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(139,28,49,0.3)] border-4 border-brand-accent/50 aspect-square max-h-[600px] ml-auto">
               <img 
-                src="https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1000&q=80" 
-                alt="Delicious Biryani Platter" 
+                src={`${import.meta.env.BASE_URL}hero/hero.webp`} 
+                alt="Authentic Azerbaijani Food at Salam Baku Restaurant" 
+                width={1000}
+                height={1000}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
                 className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent pointer-events-none" />
