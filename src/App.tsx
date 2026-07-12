@@ -15,6 +15,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import WhatsAppWidget from "./components/WhatsAppWidget";
+const ContactLocation = lazy(() => import("./components/ContactLocation"));
 
 // ---------- Lazy Loaded Components ----------
 const Features = lazy(() => import("./components/Features"));
@@ -106,6 +107,8 @@ export default function App() {
           <FAQ />
 
           <About />
+
+          <ContactLocation />
 
         </Suspense>
 
