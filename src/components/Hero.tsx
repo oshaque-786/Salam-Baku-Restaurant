@@ -82,6 +82,7 @@ export default function Hero() {
                 height={1000}
                 loading="eager"
                 fetchPriority="high"
+                importance="high"
                 decoding="async"
                 className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
               />

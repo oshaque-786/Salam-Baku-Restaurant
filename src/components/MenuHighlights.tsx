@@ -186,6 +186,7 @@ export default function MenuHighlights() {
                     src={item.src} 
                     alt={item.alt} 
                     loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
@@ -195,6 +196,7 @@ export default function MenuHighlights() {
                       src={item.thumbnail} 
                       alt={item.alt} 
                       loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
@@ -210,6 +212,7 @@ export default function MenuHighlights() {
                       src={item.thumbnail} 
                       alt={item.alt} 
                       loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
@@ -264,6 +267,7 @@ export default function MenuHighlights() {
                   className="w-full h-[80vh] rounded-lg border border-white/20 shadow-2xl"
                   allowFullScreen
                   loading="lazy"
+                  decoding="async"
                   referrerPolicy="no-referrer-when-downgrade"
                 ></iframe>
               )}
