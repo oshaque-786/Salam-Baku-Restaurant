@@ -63,9 +63,21 @@ export default function Hero() {
           >
             {/* Main feature image - A clear Biryani image */}
             <div className="relative rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(139,28,49,0.3)] border-4 border-brand-accent/50 aspect-square max-h-[600px] ml-auto">
-              <img 
-                src={`${import.meta.env.BASE_URL}hero/hero.webp`} 
-                alt="Authentic Azerbaijani Food at Salam Baku Restaurant" 
+            <picture>
+
+              <source
+                srcSet={`${import.meta.env.BASE_URL}hero/hero.webp`}
+                type="image/webp"
+              />
+
+              <source
+                srcSet={`${import.meta.env.BASE_URL}hero/hero.png`}
+                type="image/png"
+              />
+
+              <img
+                src={`${import.meta.env.BASE_URL}hero/hero.png`}
+                alt="Authentic Azerbaijani Food at Salam Baku Restaurant"
                 width={1000}
                 height={1000}
                 loading="eager"
@@ -73,6 +85,8 @@ export default function Hero() {
                 decoding="async"
                 className="object-cover w-full h-full hover:scale-105 transition-transform duration-700"
               />
+
+            </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent pointer-events-none" />
               
               {/* Floating Badge */}
