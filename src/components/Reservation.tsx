@@ -7,6 +7,9 @@ import { db, handleFirestoreError, OperationType } from '../lib/firebase';
 export default function Reservation() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const [errorMessage, setErrorMessage] = useState("");
+
   const [reservationEnabled, setReservationEnabled] = useState(true);
 
   useEffect(() => {
@@ -32,6 +35,7 @@ export default function Reservation() {
     const data = {
       fullName: formData.get('fullName') as string,
       phoneNumber: formData.get('phoneNumber') as string,
+      email: formData.get("email") as string,
       date: formData.get('date') as string,
       time: formData.get('time') as string,
       guests: Number(formData.get('guests')),
@@ -39,14 +43,76 @@ export default function Reservation() {
       createdAt: serverTimestamp(),
     };
 
+    const today = new Date();
+
+    const selectedDate = new Date(data.date);
+
+    if (selectedDate < new Date(today.toDateString())) {
+
+      setErrorMessage("Please choose a future date.");
+
+      setIsSubmitting(false);
+
+      return;
+
+    }
+
+    if (data.guests < 1 || data.guests > 60) {
+
+      setErrorMessage("Guests must be between 1 and 60.");
+
+      setIsSubmitting(false);
+
+      return;
+
+    }
+
+    const emailRegex =
+      /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    if (!emailRegex.test(data.email)) {
+      setErrorMessage("Invalid email address.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const reservationQuery = query(
+      collection(db, "reservations"),
+      where("phoneNumber", "==", data.phoneNumber),
+      where("date", "==", data.date),
+      where("time", "==", data.time)
+    );
+
+    const existingReservation = await getDocs(reservationQuery);
+
+    if (!existingReservation.empty) {
+      setErrorMessage(
+        "A reservation already exists for this phone number, date and time."
+      );
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       await addDoc(collection(db, 'reservations'), data);
       setIsSuccess(true);
       
       // WhatsApp notification logic
-      const rawMessage = `*New Reservation Request*\n\n*Name:* ${data.fullName}\n*Phone:* ${data.phoneNumber}\n*Date:* ${data.date}\n*Time:* ${data.time}\n*Guests:* ${data.guests}`;
+      const rawMessage = `*New Reservation Request*
+
+      *Name:* ${data.fullName}
+      *Phone:* ${data.phoneNumber}
+      *Email:* ${data.email}
+      *Date:* ${data.date}
+      *Time:* ${data.time}
+      *Guests:* ${data.guests}`;
+
       const message = encodeURIComponent(rawMessage);
-      window.open(`https://wa.me/994502021166?text=${message}`, '_blank');
+
+      window.open(
+        `https://wa.me/994502021166?text=${message}`,
+        "_blank"
+      );
       
       (e.target as HTMLFormElement).reset();
       setTimeout(() => setIsSuccess(false), 5000);
@@ -107,27 +173,105 @@ export default function Reservation() {
             onSubmit={handleSubmit}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Full Name</label>
-              <input type="text" name="fullName" required placeholder="Oshaque Ali" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors" />
+
+              {/* Full Name */}
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  required
+                  placeholder="Oshaque Ali"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  name="phoneNumber"
+                  required
+                  placeholder="+994 50 2021166"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  required
+                  placeholder="info@example.com"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              {/* Date */}
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Date
+                </label>
+                <input
+                  type="date"
+                  name="date"
+                  required
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              {/* Time */}
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  Time
+                </label>
+                <input
+                  type="time"
+                  name="time"
+                  required
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
+              {/* Guests */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Number of Guests (Max 60)
+                </label>
+                <input
+                  type="number"
+                  name="guests"
+                  required
+                  min="1"
+                  max="60"
+                  placeholder="2"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors"
+                />
+              </div>
+
             </div>
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2">Phone Number</label>
-              <input type="tel" name="phoneNumber" required placeholder="+994 50 2021166" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2"><Calendar className="w-4 h-4"/> Date</label>
-              <input type="date" name="date" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2"><Clock className="w-4 h-4"/> Time</label>
-              <input type="time" name="time" required className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-white/80 mb-2 flex items-center gap-2"><Users className="w-4 h-4"/> Number of Guests (Max 60)</label>
-              <input type="number" name="guests" required min="1" max="60" placeholder="2" className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand-accent transition-colors" />
-            </div>
+
+          {
+          errorMessage && (
+          <div className="mb-6 rounded-lg bg-red-500/20 border border-red-500 text-red-300 px-4 py-3">
+          {errorMessage}
+
           </div>
+
+          )
+          }
 
           <button 
             type="submit" 
