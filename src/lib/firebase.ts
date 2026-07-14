@@ -2,6 +2,16 @@ import { initializeApp } from 'firebase/app';
 import { initializeFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged,
+  sendPasswordResetEmail,
+} from "firebase/auth";
+
+export const resetPassword = (
+  email: string
+) => sendPasswordResetEmail(auth, email);
 
 const app = initializeApp(firebaseConfig);
 export const db = initializeFirestore(app, {
@@ -52,3 +62,12 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
   console.error('Firestore Error: ', JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
+export async function adminLogin(email: string, password: string) {
+  return await signInWithEmailAndPassword(auth, email, password);
+}
+
+export async function adminLogout() {
+  return await signOut(auth);
+}
+
+export { onAuthStateChanged };

@@ -1,5 +1,8 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
 
@@ -12,6 +15,12 @@ if ("requestIdleCallback" in window) {
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <AuthProvider>
+      <App />
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+      />
+    </AuthProvider>
   </StrictMode>
 );

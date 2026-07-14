@@ -4,6 +4,8 @@ import { collection, getDocs, Timestamp, doc, getDoc, setDoc } from 'firebase/fi
 import { signInWithEmailAndPassword, onAuthStateChanged, signOut, User } from 'firebase/auth';
 import { db, auth, handleFirestoreError, OperationType } from '../lib/firebase';
 import { ArrowLeft, LogOut, Lock, Calendar, Users, Clock, Loader2, AlertCircle, ToggleLeft, ToggleRight } from 'lucide-react';
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 interface ReservationData {
   id: string;
@@ -17,6 +19,7 @@ interface ReservationData {
 }
 
 export default function AdminDashboard({ onClose }: { onClose: () => void }) {
+  const { logout } = useAuth();
   const [user, setUser] = useState<User | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -121,7 +124,16 @@ export default function AdminDashboard({ onClose }: { onClose: () => void }) {
   };
 
   const handleLogout = async () => {
-    await signOut(auth);
+    try {
+      await logout();
+
+      toast.success("Logged out successfully");
+
+      window.location.hash = "";
+    } catch (error) {
+      toast.error("Logout failed");
+      console.error(error);
+    }
   };
 
   if (!authChecked) {

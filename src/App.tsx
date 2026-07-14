@@ -15,6 +15,7 @@ import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
 import Footer from "./components/Footer";
 import WhatsAppWidget from "./components/WhatsAppWidget";
+import { useAuth } from "./context/AuthContext";
 const ContactLocation = lazy(() => import("./components/ContactLocation"));
 
 // ---------- Lazy Loaded Components ----------
@@ -27,7 +28,8 @@ const Testimonials = lazy(() => import("./components/Testimonials"));
 const TrustSection = lazy(() => import("./components/TrustSection"));
 const FAQ = lazy(() => import("./components/FAQ"));
 const About = lazy(() => import("./components/About"));
-const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const AdminLogin = lazy(() => import("./pages/AdminLogin"));
 
 function LoadingSection() {
   return (
@@ -44,6 +46,8 @@ function LoadingSection() {
 }
 
 export default function App() {
+
+  const { user, loading } = useAuth();
 
   const [isAdminRoute, setIsAdminRoute] = useState(false);
 
@@ -68,15 +72,37 @@ export default function App() {
 
   }, []);
 
-  if (isAdminRoute) {
-    return (
-      <Suspense fallback={<LoadingSection />}>
-        <AdminDashboard
-          onClose={() => (window.location.hash = "")}
-        />
-      </Suspense>
-    );
+  if (loading) {
+    return <LoadingSection />;
   }
+
+  if (isAdminRoute) {
+
+    if (!user) {
+
+    return (
+        <Suspense fallback={<LoadingSection />}>
+          <AdminLogin />
+        </Suspense>
+      );
+
+    }
+
+  return (
+    <Suspense fallback={<LoadingSection />}>
+      <Dashboard
+        onClose={() => (window.location.hash = "")}
+      />
+    </Suspense>
+  );
+
+}
+
+
+
+
+
+
 
   return (
 
