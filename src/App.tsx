@@ -3,12 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  lazy,
-  Suspense,
-  useEffect,
-  useState,
-} from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 
 // ---------- Normal Components ----------
 import Navbar from "./components/Navbar";
@@ -37,39 +32,27 @@ function LoadingSection() {
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-4 border-brand-neon border-t-transparent rounded-full animate-spin"></div>
 
-        <p className="text-white/70 text-sm">
-          Loading...
-        </p>
+        <p className="text-white/70 text-sm">Loading...</p>
       </div>
     </div>
   );
 }
 
 export default function App() {
-
   const { user, loading } = useAuth();
 
   const [isAdminRoute, setIsAdminRoute] = useState(false);
 
   useEffect(() => {
-
     const handleHashChange = () => {
       setIsAdminRoute(window.location.hash === "#admin");
     };
 
     handleHashChange();
 
-    window.addEventListener(
-      "hashchange",
-      handleHashChange
-    );
+    window.addEventListener("hashchange", handleHashChange);
 
-    return () =>
-      window.removeEventListener(
-        "hashchange",
-        handleHashChange
-      );
-
+    return () => window.removeEventListener("hashchange", handleHashChange);
   }, []);
 
   if (loading) {
@@ -77,45 +60,29 @@ export default function App() {
   }
 
   if (isAdminRoute) {
-
     if (!user) {
-
-    return (
+      return (
         <Suspense fallback={<LoadingSection />}>
           <AdminLogin />
         </Suspense>
       );
-
     }
 
-  return (
-    <Suspense fallback={<LoadingSection />}>
-      <Dashboard
-        onClose={() => (window.location.hash = "")}
-      />
-    </Suspense>
-  );
-
-}
-
-
-
-
-
-
+    return (
+      <Suspense fallback={<LoadingSection />}>
+        <Dashboard onClose={() => (window.location.hash = "")} />
+      </Suspense>
+    );
+  }
 
   return (
-
     <div className="min-h-screen bg-brand-dark font-sans selection:bg-brand-neon selection:text-brand-dark">
-
       <Navbar />
 
       <main>
-
         <Hero />
 
         <Suspense fallback={<LoadingSection />}>
-
           <Features />
 
           <MenuHighlights />
@@ -135,16 +102,12 @@ export default function App() {
           <About />
 
           <ContactLocation />
-
         </Suspense>
-
       </main>
 
       <Footer />
 
       <WhatsAppWidget />
-
     </div>
   );
-
 }

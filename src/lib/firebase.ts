@@ -1,7 +1,7 @@
-import { initializeApp } from 'firebase/app';
-import { initializeFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import firebaseConfig from '../../firebase-applet-config.json';
+import { initializeApp } from "firebase/app";
+import { initializeFirestore } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import firebaseConfig from "../../firebase-applet-config.json";
 import {
   signInWithEmailAndPassword,
   signOut,
@@ -9,23 +9,26 @@ import {
   sendPasswordResetEmail,
 } from "firebase/auth";
 
-export const resetPassword = (
-  email: string
-) => sendPasswordResetEmail(auth, email);
+export const resetPassword = (email: string) =>
+  sendPasswordResetEmail(auth, email);
 
 const app = initializeApp(firebaseConfig);
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true
-}, firebaseConfig.firestoreDatabaseId);
+export const db = initializeFirestore(
+  app,
+  {
+    experimentalForceLongPolling: true,
+  },
+  firebaseConfig.firestoreDatabaseId,
+);
 export const auth = getAuth(app);
 
 export enum OperationType {
-  CREATE = 'create',
-  UPDATE = 'update',
-  DELETE = 'delete',
-  LIST = 'list',
-  GET = 'get',
-  WRITE = 'write',
+  CREATE = "create",
+  UPDATE = "update",
+  DELETE = "delete",
+  LIST = "list",
+  GET = "get",
+  WRITE = "write",
 }
 
 export interface FirestoreErrorInfo {
@@ -42,10 +45,14 @@ export interface FirestoreErrorInfo {
       providerId?: string | null;
       email?: string | null;
     }[];
-  }
+  };
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+export function handleFirestoreError(
+  error: unknown,
+  operationType: OperationType,
+  path: string | null,
+) {
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
@@ -54,12 +61,12 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
       emailVerified: null,
       isAnonymous: null,
       tenantId: null,
-      providerInfo: []
+      providerInfo: [],
     },
     operationType,
-    path
+    path,
   };
-  console.error('Firestore Error: ', JSON.stringify(errInfo));
+  console.error("Firestore Error: ", JSON.stringify(errInfo));
   throw new Error(JSON.stringify(errInfo));
 }
 export async function adminLogin(email: string, password: string) {

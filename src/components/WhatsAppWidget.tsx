@@ -1,11 +1,13 @@
-import { motion, AnimatePresence } from 'motion/react';
-import { useState } from 'react';
-import { MessageCircle, X } from 'lucide-react';
+import { motion, AnimatePresence } from "motion/react";
+import { useState } from "react";
+import { MessageCircle, X } from "lucide-react";
 
 export default function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const phoneNumber = "994502021166";
-  const defaultMessage = encodeURIComponent("Hello! I have a question about the restaurant.");
+  const defaultMessage = encodeURIComponent(
+    "Hello! I have a question about the restaurant.",
+  );
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${defaultMessage}`;
 
   return (
@@ -21,9 +23,11 @@ export default function WhatsAppWidget() {
             <div className="bg-brand-accent p-4 text-white flex justify-between items-center">
               <div>
                 <h4 className="font-bold">Chat with us</h4>
-                <p className="text-xs text-white/80">Typically replies right away</p>
+                <p className="text-xs text-white/80">
+                  Typically replies right away
+                </p>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="p-1 hover:bg-white/20 rounded-full transition-colors"
                 aria-label="Close chat"
@@ -57,7 +61,11 @@ export default function WhatsAppWidget() {
         className="w-14 h-14 bg-[#25D366] text-white rounded-full flex items-center justify-center shadow-lg shadow-[#25D366]/30 hover:bg-[#20bd5a] transition-colors focus:outline-none"
         aria-label="Open WhatsApp chat"
       >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-7 h-7" />}
+        {isOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <MessageCircle className="w-7 h-7" />
+        )}
       </motion.button>
     </div>
   );

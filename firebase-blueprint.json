@@ -29,7 +29,15 @@
           "description": "ISO timestamp"
         }
       },
-      "required": ["fullName", "phoneNumber", "date", "time", "guests", "status", "createdAt"]
+      "required": [
+        "fullName",
+        "phoneNumber",
+        "date",
+        "time",
+        "guests",
+        "status",
+        "createdAt"
+      ]
     }
   },
   "firestore": {

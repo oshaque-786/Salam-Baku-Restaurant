@@ -1,6 +1,6 @@
-import { motion } from 'motion/react';
-import { Menu, X, UtensilsCrossed } from 'lucide-react';
-import { useState } from 'react';
+import { motion } from "motion/react";
+import { Menu, X, UtensilsCrossed } from "lucide-react";
+import { useState } from "react";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,24 +24,56 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
-            <a href="#home" className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors">Home</a>
-            <a href="#menu" className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors">Menu</a>
-            <a href="#reservation" className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors">Reservation</a>
-            <a href="#about" className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors">About</a>
-            <a href="#contact" className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors">Contact</a>
-            
-            <a href="#menu" className="px-6 py-2.5 bg-brand-neon text-brand-dark font-semibold text-sm rounded-full hover:bg-white transition-all shadow-[0_0_15px_rgba(0,229,255,0.4)] hover:shadow-[0_0_25px_rgba(0,229,255,0.6)]">
+            <a
+              href="#home"
+              className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors"
+            >
+              Home
+            </a>
+            <a
+              href="#menu"
+              className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors"
+            >
+              Menu
+            </a>
+            <a
+              href="#reservation"
+              className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors"
+            >
+              Reservation
+            </a>
+            <a
+              href="#about"
+              className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors"
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              className="text-sm font-medium text-white/80 hover:text-brand-neon transition-colors"
+            >
+              Contact
+            </a>
+
+            <a
+              href="#menu"
+              className="px-6 py-2.5 bg-brand-neon text-brand-dark font-semibold text-sm rounded-full hover:bg-white transition-all shadow-[0_0_15px_rgba(0,229,255,0.4)] hover:shadow-[0_0_25px_rgba(0,229,255,0.6)]"
+            >
               Order Online
             </a>
           </div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">
-            <button 
+            <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-white hover:text-brand-neon transition-colors p-2"
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {isOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
             </button>
           </div>
         </div>
@@ -49,18 +81,52 @@ export default function Navbar() {
 
       {/* Mobile Nav Dropdown */}
       {isOpen && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:hidden absolute top-20 left-0 w-full bg-brand-dark/95 border-b border-white/10 backdrop-blur-xl"
         >
           <div className="px-4 py-6 flex flex-col space-y-4 items-center">
-            <a href="#home" onClick={() => setIsOpen(false)} className="text-lg font-medium text-white/90">Home</a>
-            <a href="#menu" onClick={() => setIsOpen(false)} className="text-lg font-medium text-white/90">Menu</a>
-            <a href="#reservation" onClick={() => setIsOpen(false)} className="text-lg font-medium text-white/90">Reservation</a>
-            <a href="#about" onClick={() => setIsOpen(false)} className="text-lg font-medium text-white/90">About</a>
-            <a href="#contact" onClick={() => setIsOpen(false)} className="text-lg font-medium text-white/90">Contact</a>
-            <a href="#menu" onClick={() => setIsOpen(false)} className="mt-4 flex w-full justify-center px-6 py-3 bg-brand-neon text-brand-dark font-bold text-base rounded-full">
+            <a
+              href="#home"
+              onClick={() => setIsOpen(false)}
+              className="text-lg font-medium text-white/90"
+            >
+              Home
+            </a>
+            <a
+              href="#menu"
+              onClick={() => setIsOpen(false)}
+              className="text-lg font-medium text-white/90"
+            >
+              Menu
+            </a>
+            <a
+              href="#reservation"
+              onClick={() => setIsOpen(false)}
+              className="text-lg font-medium text-white/90"
+            >
+              Reservation
+            </a>
+            <a
+              href="#about"
+              onClick={() => setIsOpen(false)}
+              className="text-lg font-medium text-white/90"
+            >
+              About
+            </a>
+            <a
+              href="#contact"
+              onClick={() => setIsOpen(false)}
+              className="text-lg font-medium text-white/90"
+            >
+              Contact
+            </a>
+            <a
+              href="#menu"
+              onClick={() => setIsOpen(false)}
+              className="mt-4 flex w-full justify-center px-6 py-3 bg-brand-neon text-brand-dark font-bold text-base rounded-full"
+            >
               Order Online Now
             </a>
           </div>

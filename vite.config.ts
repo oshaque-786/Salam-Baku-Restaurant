@@ -7,10 +7,7 @@ export default defineConfig({
   // GitHub Pages Repository Base Path
   base: "/Salam-Baku-Restaurant/",
 
-  plugins: [
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [react(), tailwindcss()],
 
   resolve: {
     alias: {
@@ -39,7 +36,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes("node_modules")) {
-
             if (id.includes("react")) {
               return "react";
             }
@@ -52,10 +48,7 @@ export default defineConfig({
               return "motion";
             }
 
-            if (
-              id.includes("lucide-react") ||
-              id.includes("@google/genai")
-            ) {
+            if (id.includes("lucide-react") || id.includes("@google/genai")) {
               return "vendor";
             }
 
