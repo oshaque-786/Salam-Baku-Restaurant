@@ -32,6 +32,7 @@ export default defineConfig({
 
     assetsInlineLimit: 4096,
 
+    /*
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -57,5 +58,6 @@ export default defineConfig({
         },
       },
     },
+    */
   },
 });
