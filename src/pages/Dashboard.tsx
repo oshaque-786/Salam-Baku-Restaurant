@@ -6,6 +6,7 @@ import DashboardCharts from "./dashboard/components/DashboardCharts";
 import ReservationCards from "./dashboard/components/ReservationCards";
 import DashboardPagination from "./dashboard/components/DashboardPagination";
 import DashboardActions from "./dashboard/components/DashboardActions";
+import ReservationFilters from "./dashboard/components/ReservationFilters";
 
 import {
   ITEMS_PER_PAGE,
@@ -1292,82 +1293,24 @@ export default function AdminDashboard({
 
           </div>
 
-          <DashboardActions
-            reservationEnabled={reservationEnabled}
-            isUpdatingSettings={isUpdatingSettings}
-            toggleReservationStatus={toggleReservationStatus}
-            fetchReservations={fetchReservations}
-            exportReservationsCSV={exportReservationsCSV}
-            printReservations={printReservations}
-            handleLogout={handleLogout}
-          />
-
-          {/* ==========================================
-            SEARCH + FILTERS
-        ========================================== */}
-
-          <div className="grid lg:grid-cols-3 gap-4 mb-8">
-
-            {/* Search */}
-
-            <input
-              type="text"
-              placeholder="Search by Name, Email or Phone..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/40 focus:outline-none focus:border-brand-neon"
+            <DashboardActions
+              reservationEnabled={reservationEnabled}
+              isUpdatingSettings={isUpdatingSettings}
+              toggleReservationStatus={toggleReservationStatus}
+              fetchReservations={fetchReservations}
+              exportReservationsCSV={exportReservationsCSV}
+              printReservations={printReservations}
+              handleLogout={handleLogout}
             />
 
-            {/* Status Filter */}
-
-            <select
-              value={statusFilter}
-              onChange={(e) =>
-                setStatusFilter(
-                  e.target.value as
-                  | "all"
-                  | "pending"
-                  | "confirmed"
-                  | "cancelled"
-                )
-              }
-              className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-neon"
-            >
-              <option value="all">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-
-            {/* Date Filter */}
-
-            <input
-              type="date"
-              value={dateFilter}
-              onChange={(e) =>
-                setDateFilter(e.target.value)
-              }
-              className="px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-brand-neon"
+            <ReservationFilters
+              searchTerm={searchTerm}
+              setSearchTerm={setSearchTerm}
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              dateFilter={dateFilter}
+              setDateFilter={setDateFilter}
             />
-
-          </div>
-
-          {/* Empty Search Result */}
-
-          {!isLoadingData &&
-            filteredReservations.length === 0 && (
-
-              <div className="mb-8 rounded-xl border border-white/10 bg-white/5 p-8 text-center">
-
-                <p className="text-white/60">
-
-                  No reservations found matching your filters.
-
-                </p>
-
-              </div>
-
-            )}
 
             <DashboardStats
               totalReservations={totalReservations}
