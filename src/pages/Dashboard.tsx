@@ -1,5 +1,18 @@
 import { useState, useEffect, useMemo } from "react";
 import { motion } from "motion/react";
+import DashboardHeader from "./dashboard/components/DashboardHeader";
+
+import {
+  ITEMS_PER_PAGE,
+  STATUS_COLORS,
+  STATUS_LABELS,
+  CHART_COLORS,
+} from "./dashboard/constants";
+
+import type {
+  ReservationData,
+  DashboardProps,
+} from "./dashboard/types";
 
 import {
   collection,
@@ -61,53 +74,6 @@ import {
   Line,
 } from "recharts";
 
-
-// ==========================================
-// CONSTANTS
-// ==========================================
-
-const ITEMS_PER_PAGE = 10;
-
-const COLORS = [
-  "#FACC15",
-  "#22C55E",
-  "#EF4444",
-  "#00E5FF",
-];
-
-
-// ==========================================
-// INTERFACES
-// ==========================================
-
-interface ReservationData {
-
-  id: string;
-
-  fullName: string;
-
-  email: string;
-
-  phoneNumber: string;
-
-  date: string;
-
-  time: string;
-
-  guests: number;
-
-  status:
-  | "pending"
-  | "confirmed"
-  | "cancelled";
-
-  createdAt?: Timestamp;
-
-  specialRequests?: string;
-
-}
-
-
 // ==========================================
 // ANALYTICS
 // ==========================================
@@ -130,9 +96,7 @@ interface BusyHour {
 
 export default function AdminDashboard({
   onClose,
-}: {
-  onClose: () => void;
-}) {
+}: DashboardProps) {
 
   const { logout } = useAuth();
 
@@ -1377,8 +1341,6 @@ export default function AdminDashboard({
 
           </div>
 
-          </div>
-
           {/* ==========================================
             SEARCH + FILTERS
         ========================================== */}
@@ -1602,7 +1564,7 @@ export default function AdminDashboard({
 
                         <Cell
                           key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
+                          fill={CHART_COLORS[index % CHART_COLORS.length]}
                         />
 
                       ))}
@@ -1991,7 +1953,7 @@ export default function AdminDashboard({
                       Next
                     </button>
 
-                 </div>
+                  </div>
 
                 </div>
 
@@ -2001,10 +1963,12 @@ export default function AdminDashboard({
 
           )}
 
+        </div>
+
       </div>
 
-    </div>
+     </div>
 
-  );
+    );
 
 }
