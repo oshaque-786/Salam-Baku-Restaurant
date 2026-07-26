@@ -17,6 +17,7 @@ interface ReservationFiltersProps {
 
   fromDate: string;
   setFromDate: (v: string) => void;
+
   toDate: string;
   setToDate: (v: string) => void;
 }
@@ -36,9 +37,7 @@ function ReservationFilters({
 
   toDate,
   setToDate,
-
 }: ReservationFiltersProps) {
-
   return (
     <div className="grid lg:grid-cols-3 gap-4 mb-8">
       {/* Search */}
@@ -73,28 +72,25 @@ function ReservationFilters({
         value={dateFilter}
         onChange={setDateFilter}
       />
-  <div className="flex gap-3">
 
-    <input
-      type="date"
-      value={fromDate}
-      onChange={(e) =>
-        setFromDate(e.target.value)
-      }
-      className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white"
-    />
+      {/* Date Range */}
+      <div className="flex gap-3">
+        <input
+          type="date"
+          value={fromDate}
+          onChange={(e) => setFromDate(e.target.value)}
+          className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white"
+        />
 
-    <input
-      type="date"
-      value={toDate}
-      onChange={(e) =>
-        setToDate(e.target.value)
-      }
-      className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white"
-    />
-   </div>
-  </div>
- );
+        <input
+          type="date"
+          value={toDate}
+          onChange={(e) => setToDate(e.target.value)}
+          className="rounded-lg border border-white/10 bg-slate-900 px-3 py-2 text-white"
+        />
+      </div>
+    </div>
+  );
 }
 
 export default memo(ReservationFilters);
