@@ -1,4 +1,10 @@
-import { motion } from "motion/react";
+import {
+  createReservation,
+  checkDuplicateReservation,
+  fetchReservationSettings,
+} from "../services/reservationService";
+
+import { LazyMotion, domAnimation, m } from "motion/react";
 
 import {
   Calendar,
@@ -11,18 +17,7 @@ import {
 
 import { useState, useEffect } from "react";
 
-import {
-  collection,
-  addDoc,
-  serverTimestamp,
-  doc,
-  getDoc,
-  query,
-  where,
-  getDocs,
-} from "firebase/firestore";
-
-import { db, handleFirestoreError, OperationType } from "../lib/firebase";
+import type { ReservationData } from "../types/reservation";
 
 export default function Reservation() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,18 +28,17 @@ export default function Reservation() {
   const [reservationEnabled, setReservationEnabled] = useState(true);
 
   useEffect(() => {
-    const fetchSettings = async () => {
+    const loadSettings = async () => {
       try {
-        const docRef = doc(db, "settings", "config");
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setReservationEnabled(docSnap.data().reservationEnabled ?? true);
-        }
+        const enabled = await fetchReservationSettings();
+
+        setReservationEnabled(enabled);
       } catch (error) {
-        console.error("Error fetching settings:", error);
+        console.error(error);
       }
     };
-    fetchSettings();
+
+    loadSettings();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -56,7 +50,7 @@ export default function Reservation() {
 
     const formData = new FormData(e.currentTarget);
 
-    const data = {
+    const data: ReservationData = {
       fullName: formData.get("fullName") as string,
       phoneNumber: formData.get("phoneNumber") as string,
       email: formData.get("email") as string,
@@ -64,7 +58,6 @@ export default function Reservation() {
       time: formData.get("time") as string,
       guests: Number(formData.get("guests")),
       status: "pending",
-      createdAt: serverTimestamp(),
     };
 
     console.log("Reservation Data:", data);
@@ -97,26 +90,25 @@ export default function Reservation() {
       return;
     }
 
-    const reservationQuery = query(
-      collection(db, "reservations"),
-      where("phoneNumber", "==", data.phoneNumber),
-      where("date", "==", data.date),
-      where("time", "==", data.time),
+    const exists = await checkDuplicateReservation(
+      data.phoneNumber,
+      data.date,
+      data.time
     );
 
-    const existingReservation = await getDocs(reservationQuery);
-
-    if (!existingReservation.empty) {
+    if (exists) {
       setErrorMessage(
-        "A reservation already exists for this phone number, date and time.",
+        "A reservation already exists for this phone number, date and time."
       );
+
       setIsSubmitting(false);
+
       return;
     }
 
     try {
       console.log("Saving to Firestore...");
-      await addDoc(collection(db, "reservations"), data);
+      await createReservation(data);
       console.log("Reservation Saved Successfully");
       setIsSuccess(true);
 
@@ -164,6 +156,7 @@ export default function Reservation() {
   };
 
   return (
+  <LazyMotion features={domAnimation}>
     <section
       id="reservation"
       className="py-24 bg-brand-dark relative border-y-4 border-brand-accent"
@@ -172,14 +165,14 @@ export default function Reservation() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-12">
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="font-heading font-extrabold text-4xl md:text-5xl mb-4"
           >
             Reserve a <span className="text-brand-accent">Table</span>
-          </motion.h2>
+          </m.h2>
           <p className="text-white/70">
             Join us for an unforgettable dining experience. We can comfortably
             accommodate up to 60 guests.
@@ -187,7 +180,7 @@ export default function Reservation() {
         </div>
 
         {!reservationEnabled ? (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -208,9 +201,9 @@ export default function Reservation() {
             >
               Contact via WhatsApp
             </button>
-          </motion.div>
+          </m.div>
         ) : (
-          <motion.form
+          <m.form
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -343,9 +336,10 @@ export default function Reservation() {
                 </button>
               </p>
             </div>
-          </motion.form>
+          </m.form>
         )}
       </div>
     </section>
-  );
+  </LazyMotion>
+);
 }

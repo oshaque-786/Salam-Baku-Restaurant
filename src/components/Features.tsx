@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { Smartphone, CalendarCheck, Truck, ShieldCheck } from "lucide-react";
 
 const features = [
@@ -26,11 +26,12 @@ const features = [
 
 export default function Features() {
   return (
+   <LazyMotion features={domAnimation}>
     <section className="py-12 border-y border-white/5 bg-black/20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 lg:gap-12">
           {features.map((feature, idx) => (
-            <motion.div
+            <m.div
               key={idx}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -45,10 +46,11 @@ export default function Features() {
                 {feature.title}
               </h3>
               <p className="text-sm text-white/50">{feature.desc}</p>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

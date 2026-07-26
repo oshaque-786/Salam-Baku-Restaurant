@@ -1,4 +1,10 @@
-import { motion, AnimatePresence } from "motion/react";
+import {
+  LazyMotion,
+  domAnimation,
+  m,
+  AnimatePresence,
+} from "motion/react";
+
 import { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 
@@ -11,10 +17,11 @@ export default function WhatsAppWidget() {
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${defaultMessage}`;
 
   return (
+   <LazyMotion features={domAnimation}>
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       <AnimatePresence>
         {isOpen && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.9 }}
@@ -50,11 +57,11 @@ export default function WhatsAppWidget() {
                 Start Chat on WhatsApp
               </a>
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
 
-      <motion.button
+      <m.button
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(!isOpen)}
@@ -66,7 +73,8 @@ export default function WhatsAppWidget() {
         ) : (
           <MessageCircle className="w-7 h-7" />
         )}
-      </motion.button>
+      </m.button>
     </div>
+   </LazyMotion>
   );
 }

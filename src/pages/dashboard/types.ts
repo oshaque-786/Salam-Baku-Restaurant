@@ -1,31 +1,6 @@
-import { Timestamp } from "firebase/firestore";
+import type { ReservationData } from "../../types/reservation";
 
-export type ReservationStatus =
-  | "pending"
-  | "confirmed"
-  | "cancelled";
-
-export interface ReservationData {
-  id: string;
-
-  fullName: string;
-
-  email: string;
-
-  phoneNumber: string;
-
-  date: string;
-
-  time: string;
-
-  guests: number;
-
-  status: ReservationStatus;
-
-  createdAt?: Timestamp;
-
-  specialRequests?: string;
-}
+export type { ReservationData };
 
 export interface DashboardProps {
   onClose: () => void;

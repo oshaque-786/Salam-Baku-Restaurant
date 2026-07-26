@@ -1,7 +1,12 @@
 import { Timestamp } from "firebase/firestore";
 
+export type ReservationStatus =
+  | "pending"
+  | "confirmed"
+  | "cancelled";
+
 export interface ReservationData {
-  id: string;
+  id?: string;
 
   fullName: string;
 
@@ -15,13 +20,9 @@ export interface ReservationData {
 
   guests: number;
 
-  status: "pending" | "confirmed" | "cancelled";
+  status: ReservationStatus;
 
   createdAt?: Timestamp;
 
   specialRequests?: string;
-}
-
-export interface DashboardProps {
-  onClose: () => void;
 }

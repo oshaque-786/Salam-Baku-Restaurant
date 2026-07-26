@@ -1,4 +1,16 @@
-import { Loader2, ToggleLeft, ToggleRight, LogOut } from "lucide-react";
+import React, { memo } from "react";
+
+import {
+  Loader2,
+  ToggleLeft,
+  ToggleRight,
+  RefreshCw,
+  Download,
+  Printer,
+  LogOut,
+} from "lucide-react";
+
+import HeaderActionButton from "./HeaderActionButton";
 
 interface DashboardActionsProps {
   reservationEnabled: boolean;
@@ -11,7 +23,7 @@ interface DashboardActionsProps {
   handleLogout: () => void;
 }
 
-export default function DashboardActions({
+function DashboardActions({
   reservationEnabled,
   isUpdatingSettings,
   toggleReservationStatus,
@@ -45,35 +57,33 @@ export default function DashboardActions({
           : "Reservations Disabled"}
       </button>
 
-      <button
+      <HeaderActionButton
+        icon={RefreshCw}
+        label="Refresh"
         onClick={fetchReservations}
-        className="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white font-medium transition"
-      >
-        Refresh List
-      </button>
+      />
 
-      <button
+      <HeaderActionButton
+        icon={Download}
+        label="Export CSV"
         onClick={exportReservationsCSV}
-        className="px-4 py-2 rounded-lg bg-brand-neon text-brand-dark font-semibold hover:bg-white transition"
-      >
-        Export CSV
-      </button>
+      />
 
-      <button
+      <HeaderActionButton
+        icon={Printer}
+        label="Print"
         onClick={printReservations}
-        className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition"
-      >
-        Print Report
-      </button>
+      />
 
-      <button
+      <HeaderActionButton
+        icon={LogOut}
+        label="Logout"
         onClick={handleLogout}
-        className="px-4 py-2 rounded-lg border border-red-500 text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition"
-      >
-        <LogOut className="w-4 h-4" />
-        Sign Out
-      </button>
+        variant="danger"
+      />
 
     </div>
   );
 }
+
+export default memo(DashboardActions);

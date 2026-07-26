@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { useState } from "react";
 
 type MenuCategory =
@@ -157,17 +157,18 @@ export default function MenuHighlights() {
       : mediaItems.filter((page) => page.category === activeCategory);
 
   return (
+   <LazyMotion features={domAnimation}>
     <section id="menu" className="py-24 bg-ajrak-pattern relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-10">
-          <motion.h2
+          <m.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="font-heading font-extrabold text-4xl md:text-5xl mb-4"
           >
             Salam Baku <span className="text-brand-neon">Menu</span>
-          </motion.h2>
+          </m.h2>
           <p className="text-white/60 max-w-2xl mx-auto mb-4">
             Browse our full authentic menu. Click on any page to enlarge.
           </p>
@@ -193,7 +194,7 @@ export default function MenuHighlights() {
         {/* CSS Grid for the menu pages */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {filteredMenu.map((item, idx) => (
-            <motion.div
+            <m.div
               key={`${item.id}-${activeCategory}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -282,7 +283,7 @@ export default function MenuHighlights() {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
 
@@ -328,5 +329,6 @@ export default function MenuHighlights() {
         )}
       </div>
     </section>
+   </LazyMotion>
   );
 }

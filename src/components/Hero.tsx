@@ -1,8 +1,9 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { ArrowRight, Utensils } from "lucide-react";
 
 export default function Hero() {
   return (
+   <LazyMotion features={domAnimation}>
     <section
       id="home"
       className="relative min-h-[90vh] flex items-center pt-20 pb-24 overflow-hidden bg-ajrak-pattern"
@@ -14,7 +15,7 @@ export default function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Text Content */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -63,10 +64,10 @@ export default function Hero() {
               <span>•</span>
               <span>Fastest Delivery in Baku</span>
             </div>
-          </motion.div>
+          </m.div>
 
           {/* Right Image Content */}
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 1, delay: 0.2 }}
@@ -99,7 +100,7 @@ export default function Hero() {
               <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/80 via-transparent to-transparent pointer-events-none" />
 
               {/* Floating Badge */}
-              <motion.div
+              <m.div
                 animate={{ y: [0, -10, 0] }}
                 transition={{
                   duration: 4,
@@ -117,11 +118,12 @@ export default function Hero() {
                     Top Rated in Baku
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

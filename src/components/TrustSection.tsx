@@ -1,15 +1,16 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { BadgeCheck, Leaf, Flame, Users } from "lucide-react";
 
 export default function TrustSection() {
   return (
+   <LazyMotion features={domAnimation}>
     <section className="py-24 bg-brand-dark border-t border-white/5 relative overflow-hidden">
       {/* Decorative background flare */}
       <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-full bg-brand-accent/10 blur-[150px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid md:grid-cols-2 gap-16 items-center">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -64,9 +65,9 @@ export default function TrustSection() {
                 </span>
               </li>
             </ul>
-          </motion.div>
+          </m.div>
 
-          <motion.div
+          <m.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
@@ -82,9 +83,10 @@ export default function TrustSection() {
               alt="Chef cooking"
               className="rounded-2xl object-cover h-64 w-full shadow-lg mt-8"
             />
-          </motion.div>
+          </m.div>
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 
@@ -29,12 +29,13 @@ export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
+   <LazyMotion features={domAnimation}>
     <section
       id="faq"
       className="py-24 bg-brand-dark/95 border-t border-white/5"
     >
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -44,11 +45,11 @@ export default function FAQ() {
             Frequently Asked{" "}
             <span className="text-brand-accent">Questions</span>
           </h2>
-        </motion.div>
+        </m.div>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
-            <motion.div
+            <m.div
               key={index}
               initial={{ opacity: 0, y: 10 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -73,10 +74,11 @@ export default function FAQ() {
               >
                 <p className="text-white/70 leading-relaxed">{faq.answer}</p>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

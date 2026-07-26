@@ -1,12 +1,45 @@
-import { useState, useEffect, useMemo } from "react";
-import { motion } from "motion/react";
-import DashboardHeader from "./dashboard/components/DashboardHeader";
-import DashboardStats from "./dashboard/components/DashboardStats";
-import DashboardCharts from "./dashboard/components/DashboardCharts";
-import ReservationCards from "./dashboard/components/ReservationCards";
-import DashboardPagination from "./dashboard/components/DashboardPagination";
-import DashboardActions from "./dashboard/components/DashboardActions";
-import ReservationFilters from "./dashboard/components/ReservationFilters";
+import { LazyMotion, domAnimation, m } from "motion/react";
+import type { ReservationData } from "../types/reservation";
+import type { DashboardProps } from "./dashboard/types";
+import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
+import { useReservations } from "../hooks/useReservations";
+import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
+import { usePagination } from "../hooks/usePagination";
+import { useDashboardStats } from "../hooks/useDashboardStats";
+import { useDashboardSettings } from "../hooks/useDashboardSettings";
+import { useDashboardUI } from "../hooks/useDashboardUI";
+import { useSelection } from "../hooks/useSelection";
+import { useBulkReservationActions } from "../hooks/useBulkReservationActions";
+import { useTableSorting } from "../hooks/useTableSorting";
+import { exportReservationsCSV } from "../utils/exportReservationsCSV";
+import { printReservations } from "../utils/printReservations";
+import ViewModeToggle from "./dashboard/components/ViewModeToggle";
+import DeleteReservationDialog from "./dashboard/components/DeleteReservationDialog";
+import ReservationDetailsModal from "./dashboard/components/ReservationDetailsModal";
+import { AnimatePresence } from "motion/react";
+import { useContextMenu } from "../hooks/useContextMenu";
+import { useKeyboardShortcuts } from "../hooks/useKeyboardShortcuts";
+import { useActiveRow } from "../hooks/useActiveRow";
+import { useFilterPresets } from "../hooks/useFilterPresets";
+import FilterPresets from "./dashboard/components/FilterPresets";
+import CommandPalette, { type CommandItem } from "./dashboard/components/CommandPalette";
+import { useRecentCommands } from "../hooks/useRecentCommands";
+
+import {
+  useSavedViews,
+  type SavedView,
+} from "../hooks/useSavedViews";
+
+import {
+  lazy,
+  Suspense,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+  memo,
+} from "react";
 
 import {
   ITEMS_PER_PAGE,
@@ -14,22 +47,6 @@ import {
   STATUS_LABELS,
   CHART_COLORS,
 } from "./dashboard/constants";
-
-import type {
-  ReservationData,
-  DashboardProps,
-} from "./dashboard/types";
-
-import {
-  collection,
-  getDocs,
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  deleteDoc,
-  Timestamp,
-} from "firebase/firestore";
 
 import {
   signInWithEmailAndPassword,
@@ -40,13 +57,7 @@ import {
 import {
   db,
   auth,
-  handleFirestoreError,
-  OperationType,
 } from "../lib/firebase";
-
-import { useAuth } from "../context/AuthContext";
-
-import toast from "react-hot-toast";
 
 import {
   ArrowLeft,
@@ -62,6 +73,10 @@ import {
   CheckCircle,
   XCircle,
   ListOrdered,
+  LayoutGrid,
+  Table2,
+  RefreshCw,
+  Clock3,
 } from "lucide-react";
 
 import {
@@ -80,31 +95,81 @@ import {
   Line,
 } from "recharts";
 
+const DashboardHeader = lazy(() =>
+  import("./dashboard/components/DashboardHeader")
+);
+
+const DashboardStats = lazy(() =>
+  import("./dashboard/components/DashboardStats")
+);
+
+const DashboardCharts = lazy(() =>
+  import("./dashboard/components/DashboardCharts")
+);
+
+const DashboardActions = lazy(() =>
+  import("./dashboard/components/DashboardActions")
+);
+
+const ReservationFilters = lazy(() =>
+  import("./dashboard/components/ReservationFilters")
+);
+
+const QuickDateFilters = lazy(() =>
+  import("./dashboard/components/QuickDateFilters")
+);
+
+const ReservationCards = lazy(() =>
+  import("./dashboard/components/ReservationCards")
+);
+
+const ReservationTable = lazy(() =>
+  import("./dashboard/components/ReservationTable")
+);
+
+const DashboardPagination = lazy(() =>
+  import("./dashboard/components/DashboardPagination")
+);
+
+const BulkActionBar = lazy(() =>
+  import("./dashboard/components/BulkActionBar")
+);
+
+const BulkSelectionToolbar = lazy(() =>
+  import("./dashboard/components/BulkSelectionToolbar")
+);
+
+const ReservationTableSkeleton = lazy(() =>
+  import("./dashboard/components/ReservationTableSkeleton")
+);
+
+const ReservationContextMenu = lazy(() =>
+  import("./dashboard/components/ReservationContextMenu")
+);
+
+const ActiveFilterChips = lazy(() =>
+  import("./dashboard/components/ActiveFilterChips")
+);
+
+const SavedViews = lazy(() =>
+  import("./dashboard/components/SavedViews")
+);
+
 // ==========================================
 // ANALYTICS
 // ==========================================
 
-interface MonthlyAnalytics {
-
-  month: string;
-
-  reservations: number;
-
-}
-
-interface BusyHour {
-
-  time: string;
-
-  reservations: number;
-
-}
 
 export default function AdminDashboard({
   onClose,
 }: DashboardProps) {
 
   const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    await logout();
+    onClose();
+  };
 
   // ==========================================
   // AUTH STATES
@@ -128,112 +193,319 @@ export default function AdminDashboard({
   const [authChecked, setAuthChecked] =
     useState(false);
 
-  // ==========================================
-  // RESERVATION STATES
-  // ==========================================
-
-  const [reservations, setReservations] =
-    useState<ReservationData[]>([]);
-
-  const [isLoadingData, setIsLoadingData] =
+  const [commandPaletteOpen, setCommandPaletteOpen] =
     useState(false);
 
-  const [dataError, setDataError] =
+  const [commandQuery, setCommandQuery] =
     useState("");
 
-  // ==========================================
-  // SETTINGS
-  // ==========================================
+  const [selectedCommandIndex, setSelectedCommandIndex] =
+    useState(0);
 
-  const [
-    reservationEnabled,
-    setReservationEnabled,
-  ] = useState(true);
+  const {
 
-  const [
-    isUpdatingSettings,
-    setIsUpdatingSettings,
-  ] = useState(false);
+  searchTerm,
+  setSearchTerm,
 
-  // ==========================================
-  // SEARCH
-  // ==========================================
+  statusFilter,
+  setStatusFilter,
 
-  const [searchTerm, setSearchTerm] =
-    useState("");
+  dateFilter,
+  setDateFilter,
 
-  // ==========================================
-  // FILTERS
-  // ==========================================
+  fromDate,
+  setFromDate,
 
-  const [statusFilter, setStatusFilter] =
-    useState<
-      "all" |
-      "pending" |
-      "confirmed" |
-      "cancelled"
-    >("all");
+  toDate,
+  setToDate,
 
-  const [dateFilter, setDateFilter] =
-    useState("");
+  viewMode,
+  setViewMode,
 
-  // ==========================================
-  // PAGINATION
-  // ==========================================
+  filterPreset,
+  setFilterPreset,
 
-  const [currentPage, setCurrentPage] =
-    useState(1);
+  selectedReservation,
+  setSelectedReservation,
 
-  // ==========================================
-  // STATISTICS
-  // ==========================================
+  showReservationModal,
+  setShowReservationModal,
+} = useDashboardUI();
 
-  const [
-    totalReservations,
-    setTotalReservations,
-  ] = useState(0);
+   const {
+    reservations,
+    isLoadingData,
+    dataError,
+    refreshReservations,
+    changeReservationStatus,
+    removeReservation,
+  } = useReservations();
 
-  const [
-    pendingReservations,
-    setPendingReservations,
-  ] = useState(0);
-
-  const [
-    confirmedReservations,
-    setConfirmedReservations,
-  ] = useState(0);
-
-  const [
-    cancelledReservations,
-    setCancelledReservations,
-  ] = useState(0);
-
-  // ==========================================
-  // ANALYTICS
-  // ==========================================
-
-  const [
+  const {
     monthlyAnalytics,
-    setMonthlyAnalytics,
-  ] = useState<MonthlyAnalytics[]>([]);
-
-  const [
     busyHours,
-    setBusyHours,
-  ] = useState<BusyHour[]>([]);
-  // ==========================================
-  // AUTH LISTENER
-  // ==========================================
+  } = useDashboardAnalytics(
+    reservations
+  );
+
+  const {
+    totalReservations,
+    pendingReservations,
+    confirmedReservations,
+    cancelledReservations,
+  } = useDashboardStats(reservations);
+
+  const {
+    reservationEnabled,
+    isUpdatingSettings,
+    toggleReservationStatus,
+  } = useDashboardSettings();
+
+  const {
+    selectedIds,
+    isSelected,
+    toggleSelection,
+    clearSelection,
+    selectAll,
+  } = useSelection();
+
+  const {
+    bulkConfirm,
+    bulkCancel,
+    bulkDelete,
+  } = useBulkReservationActions();
+
+  const {
+    sortKey,
+    direction,
+    toggleSort,
+    sortData,
+  } = useTableSorting<ReservationData>();
+
+  const {
+    menu,
+    openMenu,
+    closeMenu,
+  } = useContextMenu();
+
+  const {
+    savedViews,
+    saveView,
+    deleteView,
+    setDefaultView,
+    getDefaultView
+  } = useSavedViews();
+
+  const loadView = (view: SavedView) => {
+
+    setSearchTerm(view.searchTerm);
+
+    setStatusFilter(
+      view.statusFilter as
+        | "all"
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+    );
+
+    setDateFilter(view.dateFilter);
+
+    setFromDate(view.fromDate);
+
+    setToDate(view.toDate);
+
+    setFilterPreset(
+      view.filterPreset as
+        | "all"
+        | "today"
+        | "pending"
+        | "confirmed"
+        | "cancelled"
+        | "weekend"
+        | "large"
+    );
+
+  };
+
+  const saveCurrentView = () => {
+
+    const name = prompt("Saved View Name");
+
+    if (!name) return;
+
+    saveView({
+
+      id: crypto.randomUUID(),
+
+      name,
+
+      searchTerm,
+
+      statusFilter,
+
+      dateFilter,
+
+      fromDate,
+
+      toDate,
+
+      filterPreset,
+
+    });
+
+  };
+
+  const commands: CommandItem[] = [
+    {
+      id: "refresh",
+      title: "Refresh Reservations",
+      description: "Reload reservation data",
+      group: "Dashboard",
+      icon: <RefreshCw size={16} />,
+      action: () => {
+        addRecent("refresh");
+        refreshReservations();
+      },
+      },
+
+    {
+      id: "today",
+      title: "Today's Reservations",
+      description: "Show today's reservations",
+      group: "Reservations",
+      icon: <Calendar size={16} />,
+      action: () => {
+        addRecent("today");
+        // existing action
+      },
+    },
+
+    {
+      id: "logout",
+      title: "Logout",
+      description: "Sign out of dashboard",
+      group: "Account",
+      icon: <LogOut size={16} />,
+      action: () => {
+        addRecent("logout");
+        handleLogout();
+      },
+    },
+
+    {
+      id: "pending",
+      title: "Pending Reservations",
+      description: "Show only pending reservations",
+      group: "Reservations",
+      icon: <Clock3 size={16} />,
+      action: () => {
+        addRecent("pending");
+        setStatusFilter("pending");
+      },
+    },
+
+    {
+      id: "cancelled",
+      title: "Cancelled Reservations",
+      description: "Show cancelled reservations",
+      group: "Reservations",
+      icon: <XCircle size={16} />,
+      action: () => {
+        addRecent("cancelled");
+        setStatusFilter("cancelled");
+      },
+    },
+    
+    {
+      id: "confirmed",
+      title: "Show Confirmed Reservations",
+      description: "Show confirmed reservations",
+      action: () => setStatusFilter("confirmed"),
+    },
+
+    {
+      id: "cards",
+      title: "Switch to Card View",
+      description: "Switch to card layout",
+      action: () => setViewMode("cards"),
+    },
+
+    {
+      id: "table",
+      title: "Switch to Table View",
+      description: "Switch to table layout",
+      action: () => setViewMode("table"),
+    },
+    {
+      id: "logout",
+      title: "Logout",
+      description: "Sign out of dashboard",
+    action: handleLogout,
+    },
+  ];
+
+  useEffect(() => {
+    const view =
+      getDefaultView();
+    if (view) {
+      loadView(view);
+    }
+  }, [savedViews]);
 
   useEffect(() => {
 
+    const handler = (event: KeyboardEvent) => {
+
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === "k"
+      ) {
+
+        event.preventDefault();
+
+        setCommandPaletteOpen(true);
+
+        setCommandQuery("");
+
+        setSelectedCommandIndex(0);
+
+      }
+
+      if (
+      event.key === "Escape"
+      ) {
+
+        setCommandPaletteOpen(false);
+
+      }
+
+    };
+
+    window.addEventListener(
+      "keydown",
+      handler
+    );
+
+    return () =>
+
+      window.removeEventListener(
+        "keydown",
+        handler
+      );
+
+  }, []);
+
+  const {
+    recent,
+    addRecent,
+  } = useRecentCommands();
+
+  useEffect(() => {
     const unsubscribe =
       onAuthStateChanged(
         auth,
         (currentUser) => {
-
           setUser(currentUser);
-
           setAuthChecked(true);
 
         }
@@ -248,14 +520,10 @@ export default function AdminDashboard({
   // ==========================================
 
   useEffect(() => {
-
-    if (!user) return;
-
-    fetchSettings();
-
-    fetchReservations();
-
-  }, [user]);
+    if (user) {
+      refreshReservations();
+    }
+  }, [user, refreshReservations]);
 
   // ==========================================
   // FILTER RESERVATIONS
@@ -269,531 +537,180 @@ export default function AdminDashboard({
 
         reservation.fullName
           .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          )
+          .includes(searchTerm.toLowerCase())
 
         ||
 
         reservation.email
           .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          )
+          .includes(searchTerm.toLowerCase())
 
         ||
 
         reservation.phoneNumber
           .toLowerCase()
-          .includes(
-            searchTerm.toLowerCase()
-          );
+          .includes(searchTerm.toLowerCase());
 
       const matchesStatus =
 
         statusFilter === "all"
-
           ? true
-
           : reservation.status === statusFilter;
 
       const matchesDate =
 
         dateFilter === ""
-
           ? true
-
           : reservation.date === dateFilter;
 
+      const reservationDate = new Date(reservation.date);
+      const matchesRange =
+        (!fromDate ||
+          reservationDate >= new Date(fromDate))
+        &&
+        (!toDate ||
+          reservationDate <= new Date(toDate));
+
       return (
-
         matchesSearch &&
-
         matchesStatus &&
-
-        matchesDate
+        matchesDate &&
+        matchesRange
 
       );
 
     });
 
   }, [
-
     reservations,
-
     searchTerm,
-
     statusFilter,
-
     dateFilter,
-
   ]);
 
-  // ==========================================
-  // PAGINATION
-  // ==========================================
-
-  const totalPages = Math.max(
-
-    1,
-
-    Math.ceil(
-
-      filteredReservations.length /
-
-      ITEMS_PER_PAGE
-
-    )
-
+  const presetReservations = useFilterPresets(
+    filteredReservations,
+    filterPreset
   );
 
-  const currentReservations =
+  const dashboardStats = useMemo(() => {
+    return {
+      total: filteredReservations.length,
+      pending: filteredReservations.filter(
+        (r) => r.status === "pending"
+      ).length,
+      confirmed: filteredReservations.filter(
+        (r) => r.status === "confirmed"
+      ).length,
+      cancelled: filteredReservations.filter(
+        (r) => r.status === "cancelled"
+      ).length,
+    };
+  }, [filteredReservations]);
 
-    filteredReservations.slice(
+  const {
+    currentPage,
+    totalPages,
+    paginatedData: currentReservations,
+    setCurrentPage,
+    nextPage,
+    previousPage,
+  } = usePagination({
+    data: presetReservations,
+    itemsPerPage: ITEMS_PER_PAGE,
+  });
 
-      (currentPage - 1) *
+      useKeyboardShortcuts({
 
-      ITEMS_PER_PAGE,
+        selectedIds,
 
-      currentPage *
+        reservations: currentReservations,
 
-      ITEMS_PER_PAGE
+        selectAll,
 
-    );
+        clearSelection,
 
-  // ==========================================
-  // ANALYTICS DATA
-  // ==========================================
+        onDelete: async () => {
 
-  const reservationStatusData = [
-    {
-      name: "Pending",
-      value: pendingReservations,
-    },
-    {
-      name: "Confirmed",
-      value: confirmedReservations,
-    },
-    {
-      name: "Cancelled",
-      value: cancelledReservations,
-    },
-  ];
+          if (
 
-  const monthlyData = [];
+            !window.confirm(
 
-  const hourlyData = [];
+              "Delete selected reservations?"
 
-  // ==========================================
-  // RESET PAGE
-  // ==========================================
+            )
 
-  useEffect(() => {
+          ) return;
 
-    setCurrentPage(1);
+          await bulkDelete(selectedIds);
 
-  }, [
+          await refreshReservations();
 
-    searchTerm,
+          clearSelection();
 
-    statusFilter,
-
-    dateFilter,
-
-  ]);
-
-  // ==========================================
-  // LIVE STATISTICS
-  // ==========================================
-
-  useEffect(() => {
-
-    setTotalReservations(
-
-      reservations.length
-
-    );
-
-    setPendingReservations(
-
-      reservations.filter(
-
-        (r) =>
-
-          r.status === "pending"
-
-      ).length
-
-    );
-
-    setConfirmedReservations(
-
-      reservations.filter(
-
-        (r) =>
-
-          r.status === "confirmed"
-
-      ).length
-
-    );
-
-    setCancelledReservations(
-
-      reservations.filter(
-
-        (r) =>
-
-          r.status === "cancelled"
-
-      ).length
-
-    );
-
-  }, [
-
-    reservations,
-
-  ]);
-
-  // ==========================================
-  // ANALYTICS DATA
-  // ==========================================
-
-  useEffect(() => {
-
-    const monthlyMap =
-      new Map<string, number>();
-
-    const hourMap =
-      new Map<string, number>();
-
-    reservations.forEach((reservation) => {
-
-      const month =
-        reservation.date?.substring(0, 7) ||
-        "Unknown";
-
-      monthlyMap.set(
-
-        month,
-
-        (monthlyMap.get(month) || 0) + 1
-
-      );
-
-      const hour =
-        reservation.time?.split(":")[0] ||
-        "00";
-
-      hourMap.set(
-
-        hour,
-
-        (hourMap.get(hour) || 0) + 1
-
-      );
-
-    });
-
-    setMonthlyAnalytics(
-
-      Array.from(
-
-        monthlyMap.entries()
-
-      ).map(([month, reservations]) => ({
-
-        month,
-
-        reservations,
-
-      }))
-
-    );
-
-    setBusyHours(
-
-      Array.from(
-
-        hourMap.entries()
-
-      ).map(([time, reservations]) => ({
-
-        time,
-
-        reservations,
-
-      }))
-
-    );
-
-  }, [
-
-    reservations,
-
-  ]);
-  // ==========================================
-  // FETCH SETTINGS
-  // ==========================================
-
-  const fetchSettings = async () => {
-
-    try {
-
-      const settingsRef = doc(
-        db,
-        "settings",
-        "config"
-      );
-
-      const settingsSnap = await getDoc(
-        settingsRef
-      );
-
-      if (settingsSnap.exists()) {
-
-        setReservationEnabled(
-          settingsSnap.data().reservationEnabled ?? true
-        );
-
-      }
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Unable to load settings."
-      );
-
-    }
-
-  };
-
-  // ==========================================
-  // ENABLE / DISABLE RESERVATIONS
-  // ==========================================
-
-  const toggleReservationStatus = async () => {
-
-    setIsUpdatingSettings(true);
-
-    try {
-
-      const newValue = !reservationEnabled;
-
-      await setDoc(
-
-        doc(
-          db,
-          "settings",
-          "config"
-        ),
-
-        {
-          reservationEnabled: newValue,
         },
 
-        {
-          merge: true,
-        }
+        onOpen: () => {
 
-      );
+          if (selectedIds.length !== 1) return;
 
-      setReservationEnabled(newValue);
+          const reservation = currentReservations.find(
 
-      toast.success(
+            r => r.id === selectedIds[0]
 
-        newValue
-          ? "Reservations Enabled"
-          : "Reservations Disabled"
+          );
 
-      );
+          if (!reservation) return;
 
-    } catch (error) {
+          setSelectedReservation(reservation);
 
-      console.error(error);
+          setShowReservationModal(true);
 
-      toast.error(
-        "Unable to update settings."
-      );
+        },
 
-    } finally {
+        onCopy: () => {
 
-      setIsUpdatingSettings(false);
+         navigator.clipboard.writeText(
 
-    }
+            selectedIds.join(",")
 
-  };
+          );
 
-  // ==========================================
-  // FETCH RESERVATIONS
-  // ==========================================
-
-  const fetchReservations = async () => {
-
-    setIsLoadingData(true);
-
-    setDataError("");
-
-    try {
-
-      const snapshot = await getDocs(
-
-        collection(
-          db,
-          "reservations"
-        )
-
-      );
-
-      const data = snapshot.docs.map((document) => ({
-
-        id: document.id,
-
-        ...document.data(),
-
-      })) as ReservationData[];
-
-      data.sort((a, b) => {
-
-        const timeA =
-          a.createdAt?.toMillis?.() ?? 0;
-
-        const timeB =
-          b.createdAt?.toMillis?.() ?? 0;
-
-        return timeB - timeA;
+        },
 
       });
 
-      setReservations(data);
-
-    } catch (error: any) {
-
-      console.error(error);
-
-      setDataError(
-
-        error.message ||
-        "Unable to fetch reservations."
-
-      );
-
-      try {
-
-        handleFirestoreError(
-
-          error,
-
-          OperationType.LIST,
-
-          "reservations"
-
-        );
-
-      } catch { }
-
-    } finally {
-
-      setIsLoadingData(false);
-
-    }
-
-  };
+      const {
+        activeIndex,
+        setActiveIndex,
+        moveUp,
+        moveDown,
+      } = useActiveRow();
 
   // ==========================================
-  // UPDATE RESERVATION STATUS
+  // ANALYTICS DATA
   // ==========================================
 
-  const updateReservationStatus = async (
-
-    id: string,
-
-    status: "confirmed" | "cancelled"
-
-  ) => {
-
-    try {
-
-      await updateDoc(
-
-        doc(
-          db,
-          "reservations",
-          id
-        ),
-
-        {
-          status,
-        }
-
-      );
-
-      toast.success(
-        `Reservation ${status}.`
-      );
-
-      fetchReservations();
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Unable to update reservation."
-      );
-
-    }
-
-  };
-
-  // ==========================================
-  // DELETE RESERVATION
-  // ==========================================
-
-  const deleteReservation = async (
-    id: string
-  ) => {
-
-    const confirmed = window.confirm(
-
-      "Delete this reservation permanently?"
-
-    );
-
-    if (!confirmed) return;
-
-    try {
-
-      await deleteDoc(
-
-        doc(
-          db,
-          "reservations",
-          id
-        )
-
-      );
-
-      toast.success(
-        "Reservation deleted."
-      );
-
-      fetchReservations();
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Unable to delete reservation."
-      );
-
-    }
-
-  };
+  const reservationStatusData = useMemo(() => {
+    return [
+      {
+        name: "Pending",
+        value: pendingReservations,
+      },
+      {
+        name: "Confirmed",
+        value: confirmedReservations,
+      },
+      {
+        name: "Cancelled",
+        value: cancelledReservations,
+      },
+   ];
+  }, [
+    pendingReservations,
+    confirmedReservations,
+    cancelledReservations,
+  ]);
 
   // ==========================================
   // ADMIN LOGIN
@@ -859,221 +776,6 @@ export default function AdminDashboard({
   };
 
   // ==========================================
-  // LOGOUT
-  // ==========================================
-
-  const handleLogout = async () => {
-
-    try {
-
-      await logout();
-
-      toast.success(
-        "Logged out successfully."
-      );
-
-      window.location.hash = "";
-
-    } catch (error) {
-
-      console.error(error);
-
-      toast.error(
-        "Logout failed."
-      );
-
-    }
-
-  };
-
-  // ==========================================
-  // EXPORT CSV
-  // ==========================================
-
-  const exportReservationsCSV = () => {
-
-    const headers = [
-
-      "Name",
-      "Email",
-      "Phone",
-      "Date",
-      "Time",
-      "Guests",
-      "Status",
-
-    ];
-
-    const rows = reservations.map((r) => [
-
-      r.fullName,
-
-      r.email,
-
-      r.phoneNumber,
-
-      r.date,
-
-      r.time,
-
-      r.guests,
-
-      r.status,
-
-    ]);
-
-    const csvContent =
-
-      [headers, ...rows]
-
-        .map((row) => row.join(","))
-
-        .join("\n");
-
-    const blob = new Blob(
-
-      [csvContent],
-
-      {
-        type:
-          "text/csv;charset=utf-8;",
-      }
-
-    );
-
-    const url =
-      URL.createObjectURL(blob);
-
-    const link =
-      document.createElement("a");
-
-    link.href = url;
-
-    link.download =
-      "reservations.csv";
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-
-    toast.success(
-      "CSV exported successfully."
-    );
-
-  };
-
-  // ==========================================
-  // PRINT REPORT
-  // ==========================================
-
-  const printReservations = () => {
-
-    const printWindow =
-      window.open("", "_blank");
-
-    if (!printWindow) return;
-
-    const tableRows = reservations
-      .map(
-        (r) => `
-        <tr>
-          <td>${r.fullName}</td>
-          <td>${r.email}</td>
-          <td>${r.phoneNumber}</td>
-          <td>${r.date}</td>
-          <td>${r.time}</td>
-          <td>${r.guests}</td>
-          <td>${r.status}</td>
-        </tr>
-      `
-      )
-      .join("");
-
-    printWindow.document.write(`
-      <html>
-      <head>
-        <title>Reservation Report</title>
-
-        <style>
-
-          body{
-            font-family:Arial,sans-serif;
-            padding:30px;
-          }
-
-          h2{
-            text-align:center;
-          }
-
-          table{
-            width:100%;
-            border-collapse:collapse;
-            margin-top:20px;
-          }
-
-          th,td{
-            border:1px solid #ccc;
-            padding:10px;
-            text-align:left;
-          }
-
-          th{
-            background:#f3f3f3;
-          }
-
-        </style>
-
-      </head>
-
-      <body>
-
-        <h2>Salam Baku Restaurant</h2>
-
-        <h3>Reservation Report</h3>
-
-        <table>
-
-          <thead>
-
-            <tr>
-
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Guests</th>
-              <th>Status</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            ${tableRows}
-
-          </tbody>
-
-        </table>
-
-      </body>
-
-      </html>
-    `);
-
-    printWindow.document.close();
-
-    printWindow.focus();
-
-    printWindow.print();
-
-  };
-  // ==========================================
   // LOADING SCREEN
   // ==========================================
 
@@ -1116,7 +818,9 @@ export default function AdminDashboard({
 
         </div>
 
-        <motion.div
+        <m.div
+
+        onClick={closeMenu}
 
           initial={{ opacity: 0, scale: 0.95 }}
 
@@ -1241,7 +945,7 @@ export default function AdminDashboard({
 
           </form>
 
-        </motion.div>
+        </m.div>
 
       </div>
 
@@ -1253,98 +957,363 @@ export default function AdminDashboard({
   // DASHBOARD
   // ==========================================
 
-  return (
+return (
 
-    <div className="min-h-screen bg-brand-dark p-4 md:p-8">
+  <Suspense
+    fallback={
+      <div className="min-h-screen bg-brand-dark flex items-center justify-center">
+        <div className="flex items-center gap-3 text-brand-neon">
+          <Loader2 className="w-8 h-8 animate-spin" />
+          <span className="text-xl font-semibold">
+            Loading Dashboard...
+          </span>
+        </div>
+      </div>
+    }
+  >
+
+    <LazyMotion features={domAnimation}>
+
+      <div className="min-h-screen bg-brand-dark p-4 md:p-8">
 
       <div className="max-w-7xl mx-auto">
 
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+        <DashboardHeader
+          userEmail={user?.email ?? ""}
+          reservationEnabled={reservationEnabled}
+          isUpdatingSettings={isUpdatingSettings}
+          onClose={onClose}
+          onLogout={handleLogout}
+          onToggleReservation={toggleReservationStatus}
+          onRefresh={refreshReservations}
+          onPrint={() =>
+            printReservations(filteredReservations)
+          }
+          onExportCSV={() =>
+            exportReservationsCSV(filteredReservations)
+          }
+        />
 
-          <div className="flex items-center gap-4">
+        <BulkSelectionToolbar
+          count={selectedIds.length}
+          onConfirm={() => bulkConfirm(selectedIds)}
+          onCancel={() => bulkCancel(selectedIds)}
+          onDelete={() => bulkDelete(selectedIds)}
+          onClear={clearSelection}
+        />
 
-            <button
+        <DashboardActions
+          reservationEnabled={reservationEnabled}
+          isUpdatingSettings={isUpdatingSettings}
+          toggleReservationStatus={toggleReservationStatus}
+          fetchReservations={refreshReservations}
+          handleLogout={handleLogout}
+          exportReservationsCSV={() =>
+            exportReservationsCSV(filteredReservations)
+          }
+          printReservations={() =>
+            printReservations(filteredReservations)
+          }
+        />
 
-              onClick={onClose}
+        <ViewModeToggle
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+        />
 
-              className="p-2 rounded-full border border-white/10 hover:bg-white/5 text-white"
+        <ReservationFilters
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          dateFilter={dateFilter}
+          setDateFilter={setDateFilter}
+          fromDate={fromDate}
+          setFromDate={setFromDate}
+          toDate={toDate}
+          setToDate={setToDate}
+        />
 
-            >
+        <QuickDateFilters
+          setFromDate={setFromDate}
+          setToDate={setToDate}
+          onSaveView={saveCurrentView}
+        />
 
-              <ArrowLeft className="w-5 h-5" />
+        <SavedViews
+          savedViews={savedViews}
+          onLoad={loadView}
+          onDelete={deleteView}
+          onDefault={setDefaultView}
+        />
 
-            </button>
+        <ActiveFilterChips
+          searchTerm={searchTerm}
+          statusFilter={statusFilter}
+          dateFilter={dateFilter}
+          fromDate={fromDate}
+          toDate={toDate}
+          filterPreset={filterPreset}
+          setSearchTerm={setSearchTerm}
+          setStatusFilter={setStatusFilter}
+          setDateFilter={setDateFilter}
+          setFromDate={setFromDate}
+          setToDate={setToDate}
+          setFilterPreset={setFilterPreset}
+        />
 
-            <div>
+        <FilterPresets
+          filterPreset={filterPreset}
+          setFilterPreset={setFilterPreset}
+        />
 
-              <h1 className="text-3xl font-bold text-white">
+        <AnimatePresence>
+          {selectedIds.length > 0 && (
+            <BulkActionBar
+              selectedCount={selectedIds.length}
 
-                Reservation Dashboard
+              onConfirm={async () => {
+                await bulkConfirm(selectedIds);
+                await refreshReservations();
+                clearSelection();
+              }}
 
-              </h1>
+              onCancel={async () => {
+                await bulkCancel(selectedIds);
+                await refreshReservations();
+                clearSelection();
+              }}
 
-              <p className="text-white/60 mt-1">
+              onDelete={async () => {
+                if (
+                  !window.confirm(
+                    "Delete selected reservations?"
+                  )
+                ) return;
 
-                Logged in as {user.email}
+                await bulkDelete(selectedIds);
+                await refreshReservations();
+                clearSelection();
+              }}
 
-              </p>
-
-            </div>
-
-          </div>
-
-            <DashboardActions
-              reservationEnabled={reservationEnabled}
-              isUpdatingSettings={isUpdatingSettings}
-              toggleReservationStatus={toggleReservationStatus}
-              fetchReservations={fetchReservations}
-              exportReservationsCSV={exportReservationsCSV}
-              printReservations={printReservations}
-              handleLogout={handleLogout}
+              onClear={clearSelection}
             />
+          )}
+        </AnimatePresence>
 
-            <ReservationFilters
-              searchTerm={searchTerm}
-              setSearchTerm={setSearchTerm}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              dateFilter={dateFilter}
-              setDateFilter={setDateFilter}
-            />
+        <ReservationContextMenu
 
-            <DashboardStats
-              totalReservations={totalReservations}
-              pendingReservations={pendingReservations}
-              confirmedReservations={confirmedReservations}
-              cancelledReservations={cancelledReservations}
-            />
+        visible={menu.visible}
 
-            <DashboardCharts
-              reservationStatusData={reservationStatusData}
-              monthlyData={monthlyData}
-              hourlyData={hourlyData}
-            />
+        x={menu.x}
 
-            <ReservationCards
-              isLoadingData={isLoadingData}
-              dataError={dataError}
-              currentReservations={currentReservations}
-              updateReservationStatus={updateReservationStatus}
-              deleteReservation={deleteReservation}
+        y={menu.y}
+
+        reservation={menu.reservation}
+
+        onView={()=>{
+  
+        if(menu.reservation){
+
+          setSelectedReservation(
+            menu.reservation
+          );
+
+          setShowReservationModal(true);
+
+          }
+
+          closeMenu();
+
+        }}
+
+        onConfirm={async()=>{
+
+          if(menu.reservation){
+
+            await changeReservationStatus(
+
+              menu.reservation.id,
+
+              "confirmed"
+
+            );
+
+          }
+
+          closeMenu();
+
+        }}
+
+        onCancel={async()=>{
+
+          if(menu.reservation){
+
+            await changeReservationStatus(
+
+              menu.reservation.id,
+
+              "cancelled"
+
+            );
+
+          }
+
+          closeMenu();
+
+        }}
+
+        onDelete={async()=>{
+
+          if(menu.reservation){
+
+            await removeReservation(
+
+              menu.reservation.id
+
+            );
+
+          }
+
+          closeMenu();
+
+        }}
+
+        onCopyPhone={()=>{
+
+          navigator.clipboard.writeText(
+
+            menu.reservation?.phoneNumber??
+
+            ""
+
+          );
+
+          closeMenu();
+
+        }}
+
+        onCopyEmail={()=>{
+
+          navigator.clipboard.writeText(
+
+            menu.reservation?.email??
+
+            ""
+
+          );
+
+          closeMenu();
+
+        }}
+
+        />
+
+        <DashboardStats
+          totalReservations={dashboardStats.total}
+          pendingReservations={dashboardStats.pending}
+          confirmedReservations={dashboardStats.confirmed}
+          cancelledReservations={dashboardStats.cancelled}
+        />
+
+        <DashboardCharts
+          reservationStatusData={reservationStatusData}
+          monthlyData={monthlyAnalytics}
+          hourlyData={busyHours}
+        />
+
+        {viewMode === "cards" ? (
+          <ReservationCards
+            isLoadingData={isLoadingData}
+            dataError={dataError}
+            currentReservations={currentReservations}
+            updateReservationStatus={changeReservationStatus}
+            deleteReservation={removeReservation}
+            onView={(reservation) => {
+              setSelectedReservation(reservation);
+              setShowReservationModal(true);
+            }}
+          />
+        ) : (
+          <>
+            isLoadingData ? (
+              <ReservationTableSkeleton />
+            ) : (
+              <ReservationTable
+              reservations={currentReservations}
+
+              onConfirm={(id) =>
+                changeReservationStatus(id, "confirmed")
+              }
+
+              onCancel={(id) =>
+                changeReservationStatus(id, "cancelled")
+              }
+
+              onDelete={removeReservation}
+
+              onView={(reservation) => {
+                setSelectedReservation(reservation);
+                setShowReservationModal(true);
+              }}
+
+              selectedIds={selectedIds}
+              isSelected={isSelected}
+              toggleSelection={toggleSelection}
+              selectAll={selectAll}
+
+              activeIndex={activeIndex}
+
+              setActiveIndex={setActiveIndex}
+
+              sortKey={sortKey}
+              direction={direction}
+              toggleSort={toggleSort}
+
+              onRowContextMenu={openMenu}
             />
+           )
 
             <DashboardPagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={setCurrentPage}
             />
+          </>
+        )}
 
-           </div>
+      </div>
 
-          </div>
+    </div>
 
-        </div>
+            <ReservationDetailsModal
+              open={showReservationModal}
+              reservation={selectedReservation}
+              onClose={() => {
+                setShowReservationModal(false);
+                setSelectedReservation(null);
+              }}
+            />
 
-      );
+   </LazyMotion>
 
-    }
+            <CommandPalette
+              open={commandPaletteOpen}
+              query={commandQuery}
+              setQuery={setCommandQuery}
+              commands={commands}
+              recent={recent}
+              selectedIndex={selectedCommandIndex}
+              setSelectedIndex={setSelectedCommandIndex}
+              onClose={() => {
+                setCommandPaletteOpen(false);
+                setCommandQuery("");
+                setSelectedCommandIndex(0);
+              }}
+            />
+
+  </Suspense>
+
+ );
+
+}

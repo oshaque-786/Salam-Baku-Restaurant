@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 
 const photos = [
   {
@@ -29,9 +29,10 @@ const photos = [
 
 export default function Gallery() {
   return (
+   <LazyMotion features={domAnimation}>
     <section id="gallery" className="py-24 bg-brand-dark relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -44,11 +45,11 @@ export default function Gallery() {
             Take a visual tour of our culinary creations and warm, inviting
             spaces.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 lg:gap-6">
           {photos.map((photo, index) => (
-            <motion.div
+            <m.div
               key={index}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -66,10 +67,11 @@ export default function Gallery() {
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <span className="text-white font-bold">{photo.alt}</span>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

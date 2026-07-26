@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { useState } from "react";
 
 const menuCategories = ["Appetizers", "Main Course", "Desserts", "Drinks"];
@@ -80,12 +80,13 @@ export default function FullMenu() {
   const [activeCategory, setActiveCategory] = useState(menuCategories[0]);
 
   return (
+   <LazyMotion features={domAnimation}>
     <section
       id="full-menu"
       className="py-24 bg-brand-dark/95 relative border-t border-white/5"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -98,7 +99,7 @@ export default function FullMenu() {
             Discover a wide variety of authentic dishes tailored to satisfy your
             cravings.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="flex flex-wrap justify-center gap-4 mb-12">
           {menuCategories.map((category) => (
@@ -115,7 +116,7 @@ export default function FullMenu() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 max-w-5xl mx-auto">
           {menuItems[activeCategory as keyof typeof menuItems].map(
             (item, index) => (
-              <motion.div
+              <m.div
                 key={item.name}
                 initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -132,11 +133,12 @@ export default function FullMenu() {
                 <div className="text-xl font-bold text-brand-neon whitespace-nowrap">
                   {item.price}
                 </div>
-              </motion.div>
+              </m.div>
             ),
           )}
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

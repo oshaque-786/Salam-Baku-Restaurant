@@ -1,5 +1,6 @@
+import React, { memo } from "react";
 import { useState } from "react";
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -7,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { adminLogin, resetPassword } from "../lib/firebase";
+import { loginService, resetPasswordService, } from "../services/authService";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address."),
@@ -16,7 +17,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function AdminLogin() {
+function AdminLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ export default function AdminLogin() {
     try {
       setLoading(true);
 
-      await adminLogin(data.email, data.password);
+      await loginService(data.email, data.password);
 
       toast.success("Login Successful");
 
@@ -58,7 +59,7 @@ export default function AdminLogin() {
     }
 
     try {
-      await resetPassword(email);
+      await resetPasswordService(email);
 
       toast.success("Password reset email sent successfully.");
     } catch {
@@ -68,7 +69,7 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700 px-4">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 35 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
@@ -171,7 +172,9 @@ export default function AdminLogin() {
         <div className="mt-8 text-center text-white/60 text-sm">
           Salam Baku Restaurant
         </div>
-      </motion.div>
+      </m.div>
     </div>
   );
 }
+
+export default memo(AdminLogin);

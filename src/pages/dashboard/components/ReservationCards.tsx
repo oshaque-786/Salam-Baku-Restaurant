@@ -1,4 +1,5 @@
-import { motion } from "motion/react";
+import React, { memo } from "react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import {
   Calendar,
   Clock,
@@ -23,15 +24,18 @@ interface ReservationCardsProps {
   deleteReservation: (
     id: string
   ) => void;
+  onView: (reservation: ReservationData) => void;
 }
 
-export default function ReservationCards({
+function ReservationCards({
+  currentReservations,
   isLoadingData,
   dataError,
-  currentReservations,
   updateReservationStatus,
   deleteReservation,
+  onView,
 }: ReservationCardsProps) {
+
   if (isLoadingData) {
     return (
       <div className="p-12 flex flex-col items-center justify-center text-white/50 border border-white/10 rounded-xl bg-white/5">
@@ -67,7 +71,7 @@ export default function ReservationCards({
 
       {currentReservations.map((res) => (
 
-        <motion.div
+        <m.div
           key={res.id}
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -155,7 +159,7 @@ export default function ReservationCards({
 
           </div>
 
-          <div className="grid grid-cols-3 gap-2 mt-6">
+          <div className="grid grid-cols-4 gap-2 mt-6">
 
             <button
               disabled={res.status === "confirmed"}
@@ -184,6 +188,14 @@ export default function ReservationCards({
             </button>
 
             <button
+              type="button"
+              onClick={() => onView(res)}
+              className="py-2 rounded-lg bg-brand-neon text-brand-dark text-sm font-medium hover:opacity-90 transition"
+            >
+              View
+            </button>
+
+            <button
               onClick={() =>
                 deleteReservation(res.id)
               }
@@ -194,10 +206,12 @@ export default function ReservationCards({
 
           </div>
 
-        </motion.div>
+        </m.div>
 
       ))}
 
     </div>
   );
 }
+
+export default memo(ReservationCards);

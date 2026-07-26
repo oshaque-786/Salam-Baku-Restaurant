@@ -1,4 +1,6 @@
-import { motion } from "motion/react";
+import React, { memo } from "react";
+import { LazyMotion, domAnimation, m } from "motion/react";
+import PaginationButton from "./PaginationButton";
 
 interface DashboardPaginationProps {
   currentPage: number;
@@ -6,7 +8,7 @@ interface DashboardPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export default function DashboardPagination({
+function DashboardPagination({
   currentPage,
   totalPages,
   onPageChange,
@@ -14,7 +16,7 @@ export default function DashboardPagination({
   if (totalPages <= 1) return null;
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-10"
@@ -31,15 +33,13 @@ export default function DashboardPagination({
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        <PaginationButton
+          label="Previous"
+          disabled={currentPage === 1}
           onClick={() =>
             onPageChange(Math.max(currentPage - 1, 1))
           }
-          disabled={currentPage === 1}
-          className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          Previous
-        </button>
+        />
 
         {Array.from(
           { length: totalPages },
@@ -58,18 +58,18 @@ export default function DashboardPagination({
           </button>
         ))}
 
-        <button
+        <PaginationButton
+          label="Next"
+          disabled={currentPage === totalPages}
           onClick={() =>
             onPageChange(
               Math.min(currentPage + 1, totalPages)
             )
           }
-          disabled={currentPage === totalPages}
-          className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 disabled:opacity-40 disabled:cursor-not-allowed transition"
-        >
-          Next
-        </button>
+        />
       </div>
-    </motion.div>
+    </m.div>
   );
 }
+
+export default memo(DashboardPagination);

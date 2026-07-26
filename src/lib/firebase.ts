@@ -1,26 +1,38 @@
 import { initializeApp } from "firebase/app";
 import { initializeFirestore } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import firebaseConfig from "../../firebase-applet-config.json";
+
 import {
+  getAuth,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   sendPasswordResetEmail,
 } from "firebase/auth";
 
-export const resetPassword = (email: string) =>
-  sendPasswordResetEmail(auth, email);
+import firebaseConfig from "../../firebase-applet-config.json";
+
+import { handleFirestoreError } from "./firestoreHelpers";
+
+// ==========================================
+// FIREBASE INITIALIZATION
+// ==========================================
 
 const app = initializeApp(firebaseConfig);
+
 export const db = initializeFirestore(
   app,
   {
-    experimentalForceLongPolling: true,
+    experimentalForceLongPolling: false,
+    ignoreUndefinedProperties: true,
   },
-  firebaseConfig.firestoreDatabaseId,
+  firebaseConfig.firestoreDatabaseId
 );
+
 export const auth = getAuth(app);
+
+// ==========================================
+// FIRESTORE OPERATION TYPES
+// ==========================================
 
 export enum OperationType {
   CREATE = "create",
@@ -31,50 +43,40 @@ export enum OperationType {
   WRITE = "write",
 }
 
-export interface FirestoreErrorInfo {
-  error: string;
-  operationType: OperationType;
-  path: string | null;
-  authInfo: {
-    userId?: string | null;
-    email?: string | null;
-    emailVerified?: boolean | null;
-    isAnonymous?: boolean | null;
-    tenantId?: string | null;
-    providerInfo?: {
-      providerId?: string | null;
-      email?: string | null;
-    }[];
-  };
-}
+// ==========================================
+// FIRESTORE ERROR HANDLER
+// ==========================================
 
-export function handleFirestoreError(
-  error: unknown,
-  operationType: OperationType,
-  path: string | null,
+export { handleFirestoreError };
+
+// ==========================================
+// AUTH HELPERS
+// ==========================================
+
+export async function adminLogin(
+  email: string,
+  password: string
 ) {
-  const errInfo: FirestoreErrorInfo = {
-    error: error instanceof Error ? error.message : String(error),
-    authInfo: {
-      userId: null,
-      email: null,
-      emailVerified: null,
-      isAnonymous: null,
-      tenantId: null,
-      providerInfo: [],
-    },
-    operationType,
-    path,
-  };
-  console.error("Firestore Error: ", JSON.stringify(errInfo));
-  throw new Error(JSON.stringify(errInfo));
-}
-export async function adminLogin(email: string, password: string) {
-  return await signInWithEmailAndPassword(auth, email, password);
+  return signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 }
 
 export async function adminLogout() {
-  return await signOut(auth);
+  return signOut(auth);
 }
+
+export function resetPassword(email: string) {
+  return sendPasswordResetEmail(
+    auth,
+    email
+  );
+}
+
+// ==========================================
+// AUTH LISTENER
+// ==========================================
 
 export { onAuthStateChanged };

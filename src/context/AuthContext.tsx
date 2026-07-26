@@ -1,6 +1,9 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { auth, onAuthStateChanged, adminLogout } from "../lib/firebase";
+import {
+  subscribeAuthState,
+  logoutService,
+} from "../services/authService";
 
 interface AuthContextType {
   user: any;
@@ -10,12 +13,17 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [user, setUser] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = subscribeAuthState((firebaseUser) => {
       setUser(firebaseUser);
       setLoading(false);
     });
@@ -28,7 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       value={{
         user,
         loading,
-        logout: adminLogout,
+        logout: logoutService,
       }}
     >
       {children}
@@ -40,7 +48,9 @@ export function useAuth() {
   const context = useContext(AuthContext);
 
   if (!context) {
-    throw new Error("useAuth must be used inside AuthProvider");
+    throw new Error(
+      "useAuth must be used inside AuthProvider"
+    );
   }
 
   return context;

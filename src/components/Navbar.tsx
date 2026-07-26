@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { Menu, X, UtensilsCrossed } from "lucide-react";
 import { useState } from "react";
 
@@ -81,7 +81,7 @@ export default function Navbar() {
 
       {/* Mobile Nav Dropdown */}
       {isOpen && (
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
           className="md:hidden absolute top-20 left-0 w-full bg-brand-dark/95 border-b border-white/10 backdrop-blur-xl"
@@ -130,7 +130,7 @@ export default function Navbar() {
               Order Online Now
             </a>
           </div>
-        </motion.div>
+        </m.div>
       )}
     </nav>
   );

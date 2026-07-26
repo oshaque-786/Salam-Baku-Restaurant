@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { Star, Quote } from "lucide-react";
 
 const reviews = [
@@ -27,7 +27,7 @@ export default function Testimonials() {
     <section id="reviews" className="py-24 bg-black relative">
       <div className="absolute inset-0 bg-ajrak-pattern opacity-10 pointer-events-none" />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -40,11 +40,11 @@ export default function Testimonials() {
             See what our wonderful guests have to say about their dining
             experience with us.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {reviews.map((review, index) => (
-            <motion.div
+            <m.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -68,7 +68,7 @@ export default function Testimonials() {
                 <h4 className="font-bold text-white">{review.name}</h4>
                 <p className="text-sm text-brand-accent">{review.role}</p>
               </div>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>

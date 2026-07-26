@@ -20,44 +20,67 @@ export default defineConfig({
     watch: process.env.DISABLE_HMR === "true" ? null : {},
   },
 
+  optimizeDeps: {
+    include: [
+      "react",
+      "react-dom",
+    ],
+    exclude: [
+      "firebase",
+    ],
+  },
+
   build: {
-    target: "es2022",
+    target: "esnext",
 
     modulePreload: {
       polyfill: true,
     },
+
     sourcemap: false,
+
     cssCodeSplit: true,
+
+    reportCompressedSize: true,
+
     chunkSizeWarningLimit: 1000,
 
-    assetsInlineLimit: 4096,
+    assetsInlineLimit: 2048,
 
-    /*
     rollupOptions: {
       output: {
+        generatedCode: "es2015",
+
         manualChunks(id) {
-          if (id.includes("node_modules")) {
-            if (id.includes("react")) {
-              return "react";
-            }
+          if (!id.includes("node_modules")) return;
 
-            if (id.includes("firebase")) {
-              return "firebase";
-            }
-
-            if (id.includes("motion")) {
-              return "motion";
-            }
-
-            if (id.includes("lucide-react") || id.includes("@google/genai")) {
-              return "vendor";
-            }
-
-            return "vendor";
+          if (
+            id.includes("/react/") ||
+            id.includes("react-dom") ||
+            id.includes("scheduler")
+          ) {
+            return "react-vendor";
           }
-        },
+
+          if (id.includes("firebase")) {
+            return "firebase";
+          }
+
+          if (id.includes("recharts")) {
+            return "charts";
+          }
+
+          if (id.includes("motion")) {
+            return "motion";
+          }
+
+          if (id.includes("lucide-react")) {
+            return "icons";
+          }
+
+          return "vendor";
+        }
       },
     },
-    */
   },
 });

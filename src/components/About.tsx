@@ -1,4 +1,4 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import {
   Accessibility,
   Utensils,
@@ -132,12 +132,13 @@ const aboutData = [
 
 export default function About() {
   return (
+   <LazyMotion features={domAnimation}>
     <section
       id="about"
       className="py-24 bg-brand-dark relative z-10 border-t border-white/5"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -151,11 +152,11 @@ export default function About() {
             amenities to our atmosphere, we ensure every detail of your visit is
             perfect.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {aboutData.map((section, idx) => (
-            <motion.div
+            <m.div
               key={section.category}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -182,10 +183,11 @@ export default function About() {
                   </li>
                 ))}
               </ul>
-            </motion.div>
+            </m.div>
           ))}
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }

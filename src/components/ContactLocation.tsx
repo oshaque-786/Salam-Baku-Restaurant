@@ -1,14 +1,15 @@
-import { motion } from "motion/react";
+import { LazyMotion, domAnimation, m } from "motion/react";
 import { MapPin, Phone, Mail, Clock, Navigation } from "lucide-react";
 
 export default function ContactLocation() {
   return (
+   <LazyMotion features={domAnimation}>
     <section
       id="location"
       className="py-24 bg-brand-dark border-t border-white/10"
     >
       <div className="max-w-7xl mx-auto px-4">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -21,7 +22,7 @@ export default function ContactLocation() {
           <p className="text-white/60 mt-4 max-w-2xl mx-auto">
             Experience authentic Azerbaijani cuisine in the heart of Baku.
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Google Map */}
@@ -112,5 +113,6 @@ export default function ContactLocation() {
         </div>
       </div>
     </section>
+   </LazyMotion>
   );
 }
