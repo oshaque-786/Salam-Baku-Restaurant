@@ -1,7 +1,15 @@
-import { memo, useEffect, useRef } from "react";
 import { LazyMotion, domAnimation, m, AnimatePresence } from "motion/react";
 import { Search } from "lucide-react";
-import { useCommandSearch } from "../../../hooks/useCommandSearch";
+import { useAICommandSearch } from "../../../hooks/useAICommandSearch";
+import HighlightedText from "./HighlightedText";
+import { useCommandHistory } from "../../../hooks/useCommandHistory";
+
+import {
+  memo,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
 
 import {
   Calendar,
@@ -19,7 +27,13 @@ export interface CommandItem {
   title: string;
   description?: string;
   icon?: React.ReactNode;
-  group?: string;
+  group:
+    | "Reservations"
+    | "Analytics"
+    | "Notifications"
+    | "System";
+  shortcut?: string;
+  keywords?: string[];
   action: () => void;
 }
 
@@ -48,10 +62,49 @@ function CommandPalette({
 }: Props) {
 
   const filtered =
-    useCommandSearch(
-      commands,
-      query
-    );
+  useAICommandSearch(
+    commands,
+    query
+  );
+
+  const {
+    history,
+    recordCommand,
+  } = useCommandHistory();
+
+  const suggestions =
+    [...filtered]
+    .sort(
+      (a,b)=>
+        (history[b.id] ?? 0)
+        -
+        (history[a.id] ?? 0)
+    )
+    .slice(0,5);
+
+const groupedCommands = useMemo(() => {
+  return filtered.reduce(
+    (acc, command) => {
+
+      if (!acc[command.group]) {
+
+        acc[command.group] = [];
+
+      }
+
+      acc[command.group].push(command);
+
+      return acc;
+
+    },
+
+    {} as Record<
+      string,
+      CommandItem[]
+    >
+  );
+
+}, [filtered]);
 
   const selectedRef =
     useRef<HTMLButtonElement>(null);
@@ -132,7 +185,7 @@ function CommandPalette({
                 autoFocus
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Type a command..."
+                placeholder="Try: export csv, pending reservations, analytics, logout..."
                 className="w-full bg-transparent outline-none text-white placeholder:text-white/40"
               />
             </div>
@@ -148,7 +201,7 @@ function CommandPalette({
               {query === "" && recent.length > 0 && (
                 <div className="border-b border-white/10">
                   <div className="px-4 pt-3 pb-1 text-xs uppercase tracking-wider text-cyan-400">
-                    Recently Used
+                    AI Suggested
                   </div>
                   <div className="pb-2">
                     {recent.map((id) => {
@@ -161,6 +214,7 @@ function CommandPalette({
                         <button
                           key={command.id}
                           onClick={() => {
+                            recordCommand(command.id);
                             command.action();
                             onClose();
                           }}
@@ -181,66 +235,144 @@ function CommandPalette({
                         </button>
                       );
                    })}
+                 </div>
                 </div>
-             </div>
-             )}
+              )}
 
-              {filtered.map((command, index) => (
-               
-                <button
+              {query !== "" && suggestions.length > 0 && (
+              <div className="border-b border-white/10">
+              <div className="px-5 py-2 text-xs uppercase tracking-wider text-cyan-400">
+              AI Suggestions
+              </div>
+              </div>
+              )}
 
-                  ref={
-                  selectedIndex===index
-                  ? selectedRef
-                  : null
-                  }
+              {Object.entries(groupedCommands).map(
 
+              ([group, commands]) => (
+
+              <div
+              key={group}
+              className="border-b border-white/5"
+              >
+
+              <div
+              className="
+              sticky
+              top-0
+              bg-slate-900
+              px-5
+              py-2
+              text-xs
+              uppercase
+              tracking-wider
+              text-cyan-400
+              "
+              >
+
+              {group}
+
+              <span className="ml-2 text-white/30">
+
+              ({commands.length})
+
+              </span>
+
+              </div>
+
+
+
+
+
+              {commands.map((command, index) => (
+               <button
                   key={command.id}
+                  ref={selectedIndex === index ? selectedRef : null}
                   onClick={() => {
+                    recordCommand(command.id);
                     command.action();
                     onClose();
                   }}
-
                   className={`
-                  w-full
-                  border-b
-                  border-white/5
-                  px-5
-                  py-4
-                  text-left
-                  transition
-                  ${
-                   selectedIndex===index
-                     ? "bg-cyan-500/20"
-                     : "hover:bg-cyan-500/10"
-                  }
+                    w-full
+                    px-5
+                    py-4
+                    text-left
+                    transition
+                    flex
+                    items-center
+                    justify-between
+                    ${
+                      selectedIndex === index
+                        ? "bg-cyan-500/20"
+                        : "hover:bg-cyan-500/10"
+                    }
                   `}
-
                 >
-                  <div className="font-medium text-white">
-                    {command.title}
+                  <div className="flex items-center gap-3">
+                    {command.icon}
+
+                    <div>
+                      <div className="font-medium text-white">
+                        <HighlightedText
+                          text={command.title}
+                          query={query}
+                        />
+                      </div>
+
+                      {command.description && (
+                        <div className="text-xs text-white/40">
+                          <HighlightedText
+                            text={command.description}
+                            query={query}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
-                  {command.description && (
-                    <div className="text-sm text-white/50">
-                      {command.description}
+                  <div
+                  className="
+                  ml-auto
+                  mr-4
+                  text-[10px]
+                  text-cyan-400
+                  font-semibold
+                  "
+                  >
+
+                  {Math.min(
+                    100,
+                    60 + (history[command.id] ?? 0) * 5
+                  )}%
+
+                  </div>
+
+                  {command.shortcut && (
+                    <div className="rounded-md bg-white/10 px-2 py-1 text-[10px] text-white/50">
+                      Ctrl+{command.shortcut}
                     </div>
                   )}
                 </button>
               ))}
 
-            </div>
+              </div>
+              ))}
 
-            <div className="border-t border-white/10 px-4 py-2 text-xs text-white/40">
-            {filtered.length}
-            commands available
-            </div>
+              <div className="border-t border-white/10 px-4 py-2 text-xs text-white/40">
+                {filtered.length} commands available
+              </div>
 
-          </m.div>
-        </m.div>
-      </AnimatePresence>
-    </LazyMotion>
-  );
-}
+              </div>
 
-export default memo(CommandPalette);
+              </m.div>
+
+              </m.div>
+
+              </AnimatePresence>
+
+              </LazyMotion>
+              );
+              }
+
+              export default memo(CommandPalette);

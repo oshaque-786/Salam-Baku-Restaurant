@@ -25,6 +25,19 @@ import { useFilterPresets } from "../hooks/useFilterPresets";
 import FilterPresets from "./dashboard/components/FilterPresets";
 import CommandPalette, { type CommandItem } from "./dashboard/components/CommandPalette";
 import { useRecentCommands } from "../hooks/useRecentCommands";
+import NotificationBell from "./dashboard/components/NotificationBell";
+import NotificationPanel from "./dashboard/components/NotificationPanel";
+import { useNotifications } from "../hooks/useNotifications";
+import { useRealtimeNotifications } from "../hooks/useRealtimeNotifications";
+import { Toaster } from "react-hot-toast";
+import ActivityTimeline, { type ActivityItem } from "./dashboard/components/ActivityTimeline";
+import { addActivity } from "../services/activityService";
+import { useActivityTimeline } from "../hooks/useActivityTimeline";
+import DashboardInsights from "./dashboard/components/DashboardInsights";
+import { useDashboardInsights } from "../hooks/useDashboardInsights";
+import RestaurantInsights from "./dashboard/components/RestaurantInsights";
+import AIRestaurantCopilot from "./dashboard/components/AIRestaurantCopilot";
+import { useExecutiveAIBrain } from "../hooks/useExecutiveAIBrain";
 
 import {
   useSavedViews,
@@ -60,6 +73,11 @@ import {
 } from "../lib/firebase";
 
 import {
+  Bell,
+  Settings,
+  BarChart3,
+  Download,
+  Printer,
   ArrowLeft,
   LogOut,
   Lock,
@@ -202,6 +220,9 @@ export default function AdminDashboard({
   const [selectedCommandIndex, setSelectedCommandIndex] =
     useState(0);
 
+  const activities =
+    useActivityTimeline();
+
   const {
 
   searchTerm,
@@ -240,6 +261,25 @@ export default function AdminDashboard({
     changeReservationStatus,
     removeReservation,
   } = useReservations();
+
+  const [showNotifications, setShowNotifications] =
+    useState(false);
+
+  const {
+    notifications,
+    unread,
+    addNotification,
+    markRead,
+    markAllRead,
+    removeNotification,
+    togglePin,
+    clearAll,
+  } = useNotifications();
+
+  useRealtimeNotifications({
+    reservations,
+    addNotification,
+  });
 
   const {
     monthlyAnalytics,
@@ -360,7 +400,7 @@ export default function AdminDashboard({
       id: "refresh",
       title: "Refresh Reservations",
       description: "Reload reservation data",
-      group: "Dashboard",
+      group: "Reservations",
       icon: <RefreshCw size={16} />,
       action: () => {
         addRecent("refresh");
@@ -382,9 +422,9 @@ export default function AdminDashboard({
 
     {
       id: "logout",
+      group: "System",
       title: "Logout",
       description: "Sign out of dashboard",
-      group: "Account",
       icon: <LogOut size={16} />,
       action: () => {
         addRecent("logout");
@@ -418,6 +458,7 @@ export default function AdminDashboard({
     
     {
       id: "confirmed",
+      group:"Reservations",
       title: "Show Confirmed Reservations",
       description: "Show confirmed reservations",
       action: () => setStatusFilter("confirmed"),
@@ -425,6 +466,7 @@ export default function AdminDashboard({
 
     {
       id: "cards",
+      group:"System",
       title: "Switch to Card View",
       description: "Switch to card layout",
       action: () => setViewMode("cards"),
@@ -432,12 +474,14 @@ export default function AdminDashboard({
 
     {
       id: "table",
+      group:"System",
       title: "Switch to Table View",
       description: "Switch to table layout",
       action: () => setViewMode("table"),
     },
     {
       id: "logout",
+      group:"System",
       title: "Logout",
       description: "Sign out of dashboard",
     action: handleLogout,
@@ -608,6 +652,24 @@ export default function AdminDashboard({
     };
   }, [filteredReservations]);
 
+  const insights = useDashboardInsights(filteredReservations);
+
+const executiveBrain=
+useExecutiveAIBrain({
+totalReservations:
+insights.totalReservations,
+expectedRevenue:
+insights.expectedRevenue,
+weeklyGrowth:
+insights.weeklyGrowth,
+occupancyRate:
+insights.occupancyRate,
+cancellationRate:
+insights.cancellationRate,
+confirmationRate:
+insights.confirmationRate,
+});
+
   const {
     currentPage,
     totalPages,
@@ -621,63 +683,40 @@ export default function AdminDashboard({
   });
 
       useKeyboardShortcuts({
-
         selectedIds,
-
         reservations: currentReservations,
-
         selectAll,
-
         clearSelection,
-
         onDelete: async () => {
-
           if (
-
             !window.confirm(
-
               "Delete selected reservations?"
-
             )
-
-          ) return;
-
+         ) return;
           await bulkDelete(selectedIds);
-
+          await addActivity(
+            "deleted",
+            "Reservation Deleted",
+            "Reservation removed from dashboard"
+          );
           await refreshReservations();
-
           clearSelection();
-
-        },
-
+        },    
         onOpen: () => {
-
           if (selectedIds.length !== 1) return;
-
-          const reservation = currentReservations.find(
-
-            r => r.id === selectedIds[0]
-
-          );
-
+          const reservation =
+            currentReservations.find(
+              r => r.id === selectedIds[0]
+            );
           if (!reservation) return;
-
           setSelectedReservation(reservation);
-
           setShowReservationModal(true);
-
         },
-
         onCopy: () => {
-
          navigator.clipboard.writeText(
-
             selectedIds.join(",")
-
           );
-
         },
-
       });
 
       const {
@@ -686,6 +725,177 @@ export default function AdminDashboard({
         moveUp,
         moveDown,
       } = useActiveRow();
+
+  const dashboardCommands=useMemo(()=>[
+
+  {
+  id: "reservations",
+  group: "Reservations",
+  title: "Reservations",
+  description: "Go to reservation list",
+
+  keywords: [
+    "reservation",
+    "reservations",
+    "booking",
+    "bookings",
+    "guest",
+    "guests",
+    "table"
+  ],
+
+  icon: <Calendar className="h-5 w-5" />,
+  shortcut: "R",
+
+  action: () => {
+    window.scrollTo({
+      top: 700,
+      behavior: "smooth",
+    });
+  },
+},
+
+  {
+  id: "analytics",
+  group: "Analytics",
+  title: "Analytics",
+  description: "Open analytics",
+
+  keywords: [
+    "analytics",
+    "analysis",
+    "report",
+    "reports",
+    "statistics",
+    "stats",
+    "dashboard"
+  ],
+
+  icon: <BarChart3 className="h-5 w-5" />,
+  shortcut: "A",
+
+  action: () => {
+    window.scrollTo({
+      top: 1300,
+      behavior: "smooth",
+    });
+  },
+},
+
+  {
+  id: "notifications",
+  group: "Notifications",
+  title: "Notifications",
+  description: "Open notifications",
+
+  keywords: [
+    "notification",
+    "notifications",
+    "alert",
+    "alerts",
+    "message",
+    "messages"
+  ],
+
+  icon: <Bell className="h-5 w-5" />,
+  shortcut: "N",
+
+  action: () => setShowNotifications(true),
+},
+
+  {
+  id: "export",
+  group: "Analytics",
+  title: "Export CSV",
+  description: "Download reservation CSV",
+
+  keywords: [
+    "export",
+    "csv",
+    "download",
+    "excel",
+    "sheet",
+    "report"
+  ],
+
+  icon: <Download className="h-5 w-5" />,
+  shortcut: "E",
+
+  action: () =>
+    exportReservationsCSV(filteredReservations),
+},
+
+  {
+  id: "print",
+  group: "Analytics",
+  title: "Print",
+  description: "Print reservations",
+
+  keywords: [
+    "print",
+    "pdf",
+    "paper",
+    "printer"
+  ],
+
+  icon: <Printer className="h-5 w-5" />,
+  shortcut: "P",
+
+  action: () =>
+    printReservations(filteredReservations),
+},
+
+  {
+  id: "settings",
+  group: "System",
+  title: "Reservation Settings",
+  description: "Toggle reservation system",
+
+  keywords: [
+    "settings",
+    "setting",
+    "config",
+    "configuration",
+    "preferences",
+    "toggle"
+  ],
+
+  icon: <Settings className="h-5 w-5" />,
+  shortcut: "S",
+
+  action: () =>
+    toggleReservationStatus(),
+},
+
+  {
+  id: "logout",
+  group: "System",
+  title: "Logout",
+  description: "Sign out dashboard",
+
+  keywords: [
+    "logout",
+    "log out",
+    "exit",
+    "quit",
+    "signout",
+    "sign out",
+    "close"
+  ],
+
+  icon: <LogOut className="h-5 w-5" />,
+  shortcut: "L",
+
+  action: () => handleLogout(),
+},  
+
+  ], [
+  filteredReservations,
+  toggleReservationStatus,
+  handleLogout,
+  exportReservationsCSV,
+  printReservations,
+  ]);
 
   // ==========================================
   // ANALYTICS DATA
@@ -711,6 +921,7 @@ export default function AdminDashboard({
     confirmedReservations,
     cancelledReservations,
   ]);
+
 
   // ==========================================
   // ADMIN LOGIN
@@ -994,6 +1205,28 @@ return (
           }
         />
 
+      <div className="relative">
+        <NotificationBell
+          unread={unread}
+          onClick={() =>
+            setShowNotifications(
+              !showNotifications
+            )
+          }
+        />
+
+        <NotificationPanel
+          open={showNotifications}
+          notifications={notifications}
+          onClose={() => setShowNotifications(false)}
+          markRead={markRead}
+          markAllRead={markAllRead}
+          removeNotification={removeNotification}
+          togglePin={togglePin}
+          clearAll={clearAll}
+        />
+      </div>
+
         <BulkSelectionToolbar
           count={selectedIds.length}
           onConfirm={() => bulkConfirm(selectedIds)}
@@ -1099,114 +1332,74 @@ return (
               onClear={clearSelection}
             />
           )}
+
         </AnimatePresence>
-
         <ReservationContextMenu
-
         visible={menu.visible}
-
         x={menu.x}
-
         y={menu.y}
-
         reservation={menu.reservation}
-
         onView={()=>{
-  
         if(menu.reservation){
-
           setSelectedReservation(
             menu.reservation
           );
-
           setShowReservationModal(true);
-
           }
-
           closeMenu();
-
         }}
-
         onConfirm={async()=>{
-
           if(menu.reservation){
-
             await changeReservationStatus(
-
               menu.reservation.id,
-
               "confirmed"
-
             );
-
+            await addActivity(
+              "confirmed",
+              "Reservation Confirmed",
+              "Reservation status changed to confirmed"
+            );
           }
-
           closeMenu();
-
         }}
-
         onCancel={async()=>{
-
           if(menu.reservation){
-
             await changeReservationStatus(
-
               menu.reservation.id,
-
               "cancelled"
-
             );
-
+            await addActivity(
+              "cancelled",
+              "Reservation Cancelled",
+              "Reservation status changed to cancelled"
+            );
           }
-
           closeMenu();
-
         }}
-
         onDelete={async()=>{
-
           if(menu.reservation){
-
             await removeReservation(
-
               menu.reservation.id
-
             );
-
           }
-
           closeMenu();
-
         }}
-
         onCopyPhone={()=>{
-
           navigator.clipboard.writeText(
-
             menu.reservation?.phoneNumber??
 
             ""
-
           );
-
           closeMenu();
-
         }}
-
         onCopyEmail={()=>{
-
           navigator.clipboard.writeText(
-
             menu.reservation?.email??
 
             ""
-
           );
-
           closeMenu();
-
         }}
-
         />
 
         <DashboardStats
@@ -1216,10 +1409,53 @@ return (
           cancelledReservations={dashboardStats.cancelled}
         />
 
+        <RestaurantInsights
+          insights={insights}
+          executiveBrain={executiveBrain}
+        />
+
+        <AIRestaurantCopilot
+        dashboard={{
+        totalReservations,
+        confirmedReservations,
+        cancelledReservations,
+        expectedRevenue:
+        insights.expectedRevenue,
+        weeklyGrowth:
+        insights.weeklyGrowth,
+        occupancyRate:
+        insights.occupancyRate,
+        expectedReservations:
+        insights.expectedReservations,
+        }}
+        commands={{
+        exportCSV:()=>exportReservationsCSV(filteredReservations),
+        print:()=>printReservations(filteredReservations),
+        openNotifications:()=>setShowNotifications(true),
+        scrollAnalytics:()=>
+        window.scrollTo({
+        top:1300,
+        behavior:"smooth",
+        }),
+        logout:()=>handleLogout(),
+        }}
+        />
+
+        <DashboardInsights
+          busiestDay={insights.busiestDay}
+          peakHour={insights.peakHour}
+          cancellationRate={insights.cancellationRate}
+          recommendation={insights.recommendation}
+        />
+
         <DashboardCharts
           reservationStatusData={reservationStatusData}
           monthlyData={monthlyAnalytics}
           hourlyData={busyHours}
+        />
+
+        <ActivityTimeline
+          activities={activities}
         />
 
         {viewMode === "cards" ? (
