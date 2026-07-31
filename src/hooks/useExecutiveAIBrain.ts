@@ -118,6 +118,38 @@ let revenueConfidence=95;
 
 let revenueTrend="Stable";
 
+let tomorrowReservations=0;
+
+let nextWeekReservations=0;
+
+let nextMonthReservations=0;
+
+let reservationTrend="Stable";
+
+let reservationConfidence=95;
+
+let reservationRisk="Low";
+
+let predictedOccupancy=0;
+
+let occupancyTrend="Stable";
+
+let occupancyConfidence=95;
+
+let occupancyRecommendation="";
+
+let kitchenStaffRequired=0;
+
+let serviceStaffRequired=0;
+
+let frontDeskStaffRequired=0;
+
+let deliveryStaffRequired=0;
+
+let staffingStatus="Balanced";
+
+let staffingRecommendation="";
+
 let todayFocus = "";
 
 const executiveAlerts:string[] = [];
@@ -762,6 +794,223 @@ revenueConfidence
 
 );
 
+tomorrowReservations=
+
+Math.max(
+0,
+Math.round(
+data.totalReservations/7
+)
+);
+
+nextWeekReservations=
+
+Math.max(
+0,
+Math.round(
+data.totalReservations*
+(1+data.weeklyGrowth/100)
+)
+);
+
+nextMonthReservations=
+
+Math.round(
+nextWeekReservations*4
+);
+
+if(data.weeklyGrowth>10){
+
+reservationTrend="Growing";
+
+reservationConfidence=98;
+
+}
+
+else if(data.weeklyGrowth>=0){
+
+reservationTrend="Stable";
+
+reservationConfidence=92;
+
+}
+
+else{
+
+reservationTrend="Declining";
+
+reservationConfidence=80;
+
+reservationRisk="High";
+
+}
+
+if(data.occupancyRate<60){
+
+reservationRisk="Critical";
+
+reservationConfidence-=10;
+
+}
+
+reservationConfidence=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+reservationConfidence
+
+)
+
+);
+
+predictedOccupancy=
+
+Math.min(
+
+100,
+
+Math.round(
+
+(nextWeekReservations/
+
+Math.max(
+
+1,
+
+data.totalReservations
+
+))
+
+*
+
+data.occupancyRate
+
+)
+
+);
+
+if(predictedOccupancy>=90){
+
+occupancyTrend="Very High";
+
+occupancyRecommendation=
+
+"Increase staffing and inventory.";
+
+}
+
+else if(predictedOccupancy>=75){
+
+occupancyTrend="Healthy";
+
+occupancyRecommendation=
+
+"Maintain current operations.";
+
+}
+
+else if(predictedOccupancy>=60){
+
+occupancyTrend="Moderate";
+
+occupancyRecommendation=
+
+"Launch marketing campaign.";
+
+}
+
+else{
+
+occupancyTrend="Low";
+
+occupancyRecommendation=
+
+"Immediate promotion required.";
+
+occupancyConfidence-=10;
+
+}
+
+occupancyConfidence=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+occupancyConfidence
+
+)
+
+);
+
+kitchenStaffRequired=
+
+Math.max(
+2,
+Math.ceil(predictedOccupancy/20)
+);
+
+serviceStaffRequired=
+
+Math.max(
+2,
+Math.ceil(predictedOccupancy/18)
+);
+
+frontDeskStaffRequired=
+
+Math.max(
+1,
+Math.ceil(predictedOccupancy/40)
+);
+
+deliveryStaffRequired=
+
+Math.max(
+1,
+Math.ceil(predictedOccupancy/25)
+);
+
+if(predictedOccupancy>=90){
+
+staffingStatus="High Demand";
+
+staffingRecommendation=
+
+"Increase shifts immediately.";
+
+}
+
+else if(predictedOccupancy>=75){
+
+staffingStatus="Normal";
+
+staffingRecommendation=
+
+"Current staffing is sufficient.";
+
+}
+
+else{
+
+staffingStatus="Low Demand";
+
+staffingRecommendation=
+
+"Reduce extra shifts.";
+
+}
+
 return{
 
 healthScore,
@@ -837,6 +1086,30 @@ nextMonthRevenue,
 revenueConfidence,
 
 revenueTrend,
+
+tomorrowReservations,
+
+nextWeekReservations,
+
+nextMonthReservations,
+
+reservationTrend,
+
+reservationConfidence,
+
+reservationRisk,
+
+kitchenStaffRequired,
+
+serviceStaffRequired,
+
+frontDeskStaffRequired,
+
+deliveryStaffRequired,
+
+staffingStatus,
+
+staffingRecommendation,
 
 };
 

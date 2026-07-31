@@ -1623,6 +1623,312 @@ Trend
 
 </div>
 
+<div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-purple-300">
+
+AI Reservation Forecast
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Tomorrow
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.tomorrowReservations}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Next Week
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-emerald-300">
+
+{executiveBrain.nextWeekReservations}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Next Month
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-yellow-300">
+
+{executiveBrain.nextMonthReservations}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8 grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Trend
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-pink-300">
+
+{executiveBrain.reservationTrend}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Confidence
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-cyan-300">
+
+{executiveBrain.reservationConfidence}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Risk
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-red-300">
+
+{executiveBrain.reservationRisk}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-orange-300">
+
+AI Occupancy Prediction
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Predicted Occupancy
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-orange-300">
+
+{executiveBrain.predictedOccupancy}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Trend
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-cyan-300">
+
+{executiveBrain.occupancyTrend}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Confidence
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-emerald-300">
+
+{executiveBrain.occupancyConfidence}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Recommendation
+
+</div>
+
+<div className="mt-2 text-sm text-white">
+
+{executiveBrain.occupancyRecommendation}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-green-500/20 bg-green-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-green-300">
+
+AI Staffing Forecast
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Kitchen
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-orange-300">
+
+{executiveBrain.kitchenStaffRequired}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Service
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.serviceStaffRequired}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Front Desk
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-purple-300">
+
+{executiveBrain.frontDeskStaffRequired}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Delivery
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-emerald-300">
+
+{executiveBrain.deliveryStaffRequired}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Staffing Status
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-cyan-300">
+
+{executiveBrain.staffingStatus}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Recommendation
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.staffingRecommendation}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
