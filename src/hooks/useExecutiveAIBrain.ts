@@ -220,6 +220,16 @@ let executiveStatus="";
 
 let ceoRecommendation="";
 
+let autonomousManagerStatus="Online";
+
+let autonomousDecision="";
+
+let autonomousConfidence=100;
+
+const autonomousActions:string[]=[];
+
+let managerSummary="";
+
 let todayFocus = "";
 
 const executiveAlerts:string[] = [];
@@ -1775,6 +1785,126 @@ ceoRecommendation=
 
 }
 
+// ==========================================
+// AUTONOMOUS RESTAURANT MANAGER
+// ==========================================
+
+if(alertLevel==="Critical"){
+
+autonomousDecision=
+
+"Immediately activate recovery plan.";
+
+autonomousActions.push(
+
+"Notify executive team"
+
+);
+
+autonomousActions.push(
+
+"Review all critical KPIs"
+
+);
+
+autonomousActions.push(
+
+"Increase management supervision"
+
+);
+
+autonomousConfidence-=10;
+
+}
+
+else if(demandForecast>=90){
+
+autonomousDecision=
+
+"Prepare restaurant for peak demand.";
+
+autonomousActions.push(
+
+"Increase staffing"
+
+);
+
+autonomousActions.push(
+
+"Increase kitchen inventory"
+
+);
+
+autonomousActions.push(
+
+"Extend delivery capacity"
+
+);
+
+}
+
+else if(demandForecast>=70){
+
+autonomousDecision=
+
+"Maintain optimized operations.";
+
+autonomousActions.push(
+
+"Monitor reservations"
+
+);
+
+autonomousActions.push(
+
+"Monitor inventory"
+
+);
+
+}
+
+else{
+
+autonomousDecision=
+
+"Stimulate customer demand.";
+
+autonomousActions.push(
+
+"Launch marketing campaign"
+
+);
+
+autonomousActions.push(
+
+"Offer promotional discounts"
+
+);
+
+autonomousConfidence-=5;
+
+}
+
+managerSummary=
+
+`${executiveStatus} • ${alertLevel} Alerts • ${demandLevelAI} Demand • CEO Score ${ceoScore}%`;
+
+autonomousConfidence=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+autonomousConfidence
+
+)
+
+);
+
 return{
 
 healthScore,
@@ -1944,6 +2074,16 @@ ceoScore,
 executiveStatus,
 
 ceoRecommendation,
+
+autonomousManagerStatus,
+
+autonomousDecision,
+
+autonomousConfidence,
+
+autonomousActions,
+
+managerSummary,
 
 };
 

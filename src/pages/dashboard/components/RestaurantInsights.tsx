@@ -2629,6 +2629,118 @@ CEO Recommendation
 
 </div>
 
+{/* ==========================================
+AUTONOMOUS RESTAURANT MANAGER
+========================================== */}
+
+<div className="mt-10 rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-fuchsia-300">
+
+Autonomous Restaurant Manager
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Manager Status
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-emerald-300">
+
+{executiveBrain.autonomousManagerStatus}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Confidence
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.autonomousConfidence}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Decision
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.autonomousDecision}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8">
+
+<div className="mb-3 font-semibold text-cyan-300">
+
+Autonomous Actions
+
+</div>
+
+{executiveBrain.autonomousActions.map(
+
+(action:string,index:number)=>(
+
+<div
+
+key={index}
+
+className="mb-2 rounded-lg bg-fuchsia-500/10 px-3 py-2 text-sm text-white"
+
+>
+
+✓ {action}
+
+</div>
+
+)
+
+)}
+
+</div>
+
+<div className="mt-8 rounded-xl bg-fuchsia-500/10 p-5">
+
+<div className="text-sm text-white/40">
+
+Manager Summary
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.managerSummary}
+
+</div>
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
