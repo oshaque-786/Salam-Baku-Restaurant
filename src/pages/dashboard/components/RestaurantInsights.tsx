@@ -2905,6 +2905,44 @@ Retention Priority
 
 </div>
 
+{/* ==========================================
+CUSTOMER RETENTION ENGINE
+========================================== */}
+
+<div className="mt-10 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-pink-300">
+
+Customer Retention Recommendations
+
+</h2>
+
+<div className="space-y-3">
+
+{insights.retentionRecommendations.map(
+
+(item:string,index:number)=>(
+
+<div
+
+key={index}
+
+className="rounded-lg bg-pink-500/10 px-4 py-3 text-sm text-white"
+
+>
+
+✓ {item}
+
+</div>
+
+)
+
+)}
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>

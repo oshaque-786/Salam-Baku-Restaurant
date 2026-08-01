@@ -647,6 +647,62 @@ vipCustomers>10
 
 :"Growing";
 
+// ==========================================
+// CUSTOMER RETENTION ENGINE
+// ==========================================
+
+const retentionRecommendations:string[]=[];
+
+if(atRiskCustomers>=5){
+
+retentionRecommendations.push(
+
+"Launch customer recovery campaign."
+
+);
+
+}
+
+if(vipCustomers>=10){
+
+retentionRecommendations.push(
+
+"Offer exclusive VIP rewards."
+
+);
+
+}
+
+if(returningCustomers>=30){
+
+retentionRecommendations.push(
+
+"Introduce loyalty bonus program."
+
+);
+
+}
+
+if(customerSatisfaction<85){
+
+retentionRecommendations.push(
+
+"Improve customer experience."
+
+);
+
+}
+
+if(retentionRecommendations.length===0){
+
+retentionRecommendations.push(
+
+"Customer retention performance is healthy."
+
+);
+
+}
+
     return {
       busiestDay,
       peakHour,
@@ -699,6 +755,7 @@ vipCustomers>10
       premiumCustomers,
       retentionPriority,
       vipStatus,
+      retentionRecommendations,
     };
 
   }, [reservations]);
