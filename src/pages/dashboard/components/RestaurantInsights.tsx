@@ -2741,6 +2741,88 @@ Manager Summary
 
 </div>
 
+{/* ==========================================
+CUSTOMER INTELLIGENCE
+========================================== */}
+
+<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-emerald-300">
+
+Customer Intelligence
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+VIP Customers
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-yellow-300">
+
+{insights.vipCustomers}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Returning
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{insights.returningCustomers}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+At Risk
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-red-300">
+
+{insights.atRiskCustomers}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Satisfaction
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-emerald-300">
+
+{insights.customerSatisfaction}%
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
