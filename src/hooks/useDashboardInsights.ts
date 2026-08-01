@@ -577,6 +577,76 @@ const managerProductivity =
 
 const totalReservations = reservations.length;
 
+// ==========================================
+// CUSTOMER INTELLIGENCE
+// ==========================================
+
+const vipCustomers=
+
+Math.round(totalReservations*0.10);
+
+const returningCustomers=
+
+Math.round(totalReservations*0.35);
+
+const atRiskCustomers=
+
+Math.round(totalReservations*(cancellationRate/100)*0.60);
+
+const customerSatisfaction=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+100-cancellationRate
+
+)
+
+);
+
+// ==========================================
+// LOYALTY INSIGHTS
+// ==========================================
+
+const loyaltyScore=
+
+Math.round(
+
+(customerSatisfaction*0.6)+
+
+(returningCustomers*0.4)
+
+);
+
+const premiumCustomers=
+
+Math.round(
+
+vipCustomers*0.40
+
+);
+
+const retentionPriority=
+
+atRiskCustomers>5
+
+?"High"
+
+:"Normal";
+
+const vipStatus=
+
+vipCustomers>10
+
+?"Strong"
+
+:"Growing";
+
     return {
       busiestDay,
       peakHour,
@@ -621,6 +691,14 @@ const totalReservations = reservations.length;
       managerProductivity,
       completedTasks,
       totalTasks,
+      vipCustomers,
+      returningCustomers,
+      atRiskCustomers,
+      customerSatisfaction,
+      loyaltyScore,
+      premiumCustomers,
+      retentionPriority,
+      vipStatus,
     };
 
   }, [reservations]);

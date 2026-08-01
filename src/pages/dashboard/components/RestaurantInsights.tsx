@@ -2823,6 +2823,88 @@ Satisfaction
 
 </div>
 
+{/* ==========================================
+LOYALTY & VIP INSIGHTS
+========================================== */}
+
+<div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-amber-300">
+
+Loyalty & VIP Insights
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Loyalty Score
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-amber-300">
+
+{insights.loyaltyScore}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+VIP Status
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-cyan-300">
+
+{insights.vipStatus}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Premium Customers
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-purple-300">
+
+{insights.premiumCustomers}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Retention Priority
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-red-300">
+
+{insights.retentionPriority}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
