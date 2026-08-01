@@ -206,6 +206,14 @@ let alertCount=0;
 
 let emergencyAction="";
 
+let briefingPeriod="Morning";
+
+const executiveBriefing:string[]=[];
+
+let tomorrowFocus="";
+
+let dailySummary="";
+
 let todayFocus = "";
 
 const executiveAlerts:string[] = [];
@@ -1623,6 +1631,88 @@ emergencyAction=
 
 }
 
+const currentHour=
+
+new Date().getHours();
+
+if(currentHour<12){
+
+briefingPeriod="Morning";
+
+}
+
+else if(currentHour<18){
+
+briefingPeriod="Afternoon";
+
+}
+
+else{
+
+briefingPeriod="Evening";
+
+}
+
+executiveBriefing.push(
+
+`Restaurant Health: ${healthScore}%`
+
+);
+
+executiveBriefing.push(
+
+`Forecast Demand: ${demandForecast}%`
+
+);
+
+executiveBriefing.push(
+
+`Alert Level: ${alertLevel}`
+
+);
+
+executiveBriefing.push(
+
+`Priority: ${executivePriorityLevel}`
+
+);
+
+if(alertLevel==="Critical"){
+
+tomorrowFocus=
+
+"Focus on operational recovery.";
+
+}
+
+else if(demandForecast>=90){
+
+tomorrowFocus=
+
+"Prepare for maximum demand.";
+
+}
+
+else if(demandForecast>=70){
+
+tomorrowFocus=
+
+"Maintain staffing and inventory.";
+
+}
+
+else{
+
+tomorrowFocus=
+
+"Increase marketing activity.";
+
+}
+
+dailySummary=
+
+`Health ${healthScore}% • Demand ${demandForecast}% • Revenue $${holidayRevenue}`;
+
 return{
 
 healthScore,
@@ -1778,6 +1868,14 @@ alertLevel,
 alertCount,
 
 emergencyAction,
+
+briefingPeriod,
+
+executiveBriefing,
+
+tomorrowFocus,
+
+dailySummary,
 
 };
 

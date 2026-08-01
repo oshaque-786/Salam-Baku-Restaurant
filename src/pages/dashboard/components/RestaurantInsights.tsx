@@ -2393,6 +2393,92 @@ className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
 
 </div>
 
+<div className="mt-10 rounded-2xl border border-sky-500/20 bg-sky-500/5 p-6">
+
+  <h2 className="mb-6 text-xl font-semibold text-sky-300">
+
+    Executive Daily Briefing
+
+  </h2>
+
+  <div className="mb-6">
+
+    <div className="text-sm text-white/40">
+
+      Current Briefing
+
+    </div>
+
+    <div className="mt-2 text-3xl font-bold text-sky-300">
+
+      {executiveBrain.briefingPeriod}
+
+    </div>
+
+  </div>
+
+  <div className="space-y-3">
+
+    {executiveBrain.executiveBriefing.map(
+
+      (item:string,index:number)=>(
+
+        <div
+
+          key={index}
+
+          className="rounded-lg bg-sky-500/10 px-4 py-3 text-sm text-white"
+
+        >
+
+          • {item}
+
+        </div>
+
+      )
+
+    )}
+
+  </div>
+
+  <div className="mt-8 grid gap-6 lg:grid-cols-2">
+
+    <div>
+
+      <div className="text-sm text-white/40">
+
+        Tomorrow Focus
+
+      </div>
+
+      <div className="mt-2 text-white">
+
+        {executiveBrain.tomorrowFocus}
+
+      </div>
+
+    </div>
+
+    <div>
+
+      <div className="text-sm text-white/40">
+
+        Daily Summary
+
+      </div>
+
+      <div className="mt-2 text-white">
+
+        {executiveBrain.dailySummary}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
