@@ -214,6 +214,12 @@ let tomorrowFocus="";
 
 let dailySummary="";
 
+let ceoScore=0;
+
+let executiveStatus="";
+
+let ceoRecommendation="";
+
 let todayFocus = "";
 
 const executiveAlerts:string[] = [];
@@ -1713,6 +1719,62 @@ dailySummary=
 
 `Health ${healthScore}% • Demand ${demandForecast}% • Revenue $${holidayRevenue}`;
 
+ceoScore=
+
+Math.round(
+
+(
+
+healthScore+
+
+demandForecast+
+
+executiveDecisionConfidence
+
+)/3
+
+);
+
+if(ceoScore>=90){
+
+executiveStatus="Excellent";
+
+ceoRecommendation=
+
+"Business is performing exceptionally well.";
+
+}
+
+else if(ceoScore>=75){
+
+executiveStatus="Strong";
+
+ceoRecommendation=
+
+"Continue current growth strategy.";
+
+}
+
+else if(ceoScore>=60){
+
+executiveStatus="Average";
+
+ceoRecommendation=
+
+"Focus on operational improvements.";
+
+}
+
+else{
+
+executiveStatus="Critical";
+
+ceoRecommendation=
+
+"Immediate executive intervention required.";
+
+}
+
 return{
 
 healthScore,
@@ -1876,6 +1938,12 @@ executiveBriefing,
 tomorrowFocus,
 
 dailySummary,
+
+ceoScore,
+
+executiveStatus,
+
+ceoRecommendation,
 
 };
 

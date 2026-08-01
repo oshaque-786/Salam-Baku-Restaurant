@@ -2479,6 +2479,156 @@ className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
 
 </div>
 
+{/* ==========================================
+RESTAURANT CEO DASHBOARD
+========================================== */}
+
+<div className="mt-10 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-violet-300">
+
+Restaurant CEO Dashboard
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+CEO Score
+
+</div>
+
+<div className="mt-2 text-4xl font-bold text-violet-300">
+
+{executiveBrain.ceoScore}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Business Status
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-cyan-300">
+
+{executiveBrain.executiveStatus}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Expected Revenue
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-emerald-300">
+
+${executiveBrain.holidayRevenue}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Expected Profit
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-yellow-300">
+
+${executiveBrain.expectedProfit}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8 grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Demand
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-orange-300">
+
+{executiveBrain.demandLevelAI}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Alert Level
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-red-300">
+
+{executiveBrain.alertLevel}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Priority
+
+</div>
+
+<div className="mt-2 text-xl font-bold text-cyan-300">
+
+{executiveBrain.executivePriorityLevel}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8 rounded-xl bg-violet-500/10 p-5">
+
+<div className="text-sm text-white/40">
+
+CEO Recommendation
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.ceoRecommendation}
+
+</div>
+
+</div>
+
+</div>
+
 <div className="text-sm text-white/40">
 Business
 </div>
