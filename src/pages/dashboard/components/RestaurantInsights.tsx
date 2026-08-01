@@ -1815,27 +1815,27 @@ Recommendation
 
 </div>
 
-<div className="mt-10 rounded-2xl border border-green-500/20 bg-green-500/5 p-6">
+<div className="mt-10 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-6">
 
-<h2 className="mb-6 text-xl font-semibold text-green-300">
+<h2 className="mb-6 text-xl font-semibold text-pink-300">
 
-AI Staffing Forecast
+AI Seasonal Trend
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid gap-6 lg:grid-cols-3">
 
 <div>
 
 <div className="text-sm text-white/40">
 
-Kitchen
+Current Season
 
 </div>
 
-<div className="mt-2 text-3xl font-bold text-orange-300">
+<div className="mt-2 text-3xl font-bold text-pink-300">
 
-{executiveBrain.kitchenStaffRequired}
+{executiveBrain.currentSeason}
 
 </div>
 
@@ -1845,13 +1845,13 @@ Kitchen
 
 <div className="text-sm text-white/40">
 
-Service
+Growth
 
 </div>
 
 <div className="mt-2 text-3xl font-bold text-cyan-300">
 
-{executiveBrain.serviceStaffRequired}
+{executiveBrain.seasonalGrowth}%
 
 </div>
 
@@ -1861,29 +1861,13 @@ Service
 
 <div className="text-sm text-white/40">
 
-Front Desk
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-purple-300">
-
-{executiveBrain.frontDeskStaffRequired}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Delivery
+Predicted Revenue
 
 </div>
 
 <div className="mt-2 text-3xl font-bold text-emerald-300">
 
-{executiveBrain.deliveryStaffRequired}
+${executiveBrain.seasonalRevenue}
 
 </div>
 
@@ -1891,19 +1875,35 @@ Delivery
 
 </div>
 
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
+<div className="mt-8 grid gap-6 lg:grid-cols-3">
 
 <div>
 
 <div className="text-sm text-white/40">
 
-Staffing Status
+Reservations
 
 </div>
 
-<div className="mt-2 text-2xl font-bold text-cyan-300">
+<div className="mt-2 text-2xl font-bold text-yellow-300">
 
-{executiveBrain.staffingStatus}
+{executiveBrain.seasonalReservations}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Occupancy
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-orange-300">
+
+{executiveBrain.seasonalOccupancy}%
 
 </div>
 
@@ -1919,11 +1919,475 @@ Recommendation
 
 <div className="mt-2 text-white">
 
-{executiveBrain.staffingRecommendation}
+{executiveBrain.seasonalRecommendation}
 
 </div>
 
 </div>
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-yellow-300">
+
+AI Event & Holiday Impact
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-4">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Event
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-yellow-300">
+
+{executiveBrain.eventName}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Demand
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-orange-300">
+
+{executiveBrain.demandLevel}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Business Boost
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-emerald-300">
+
+{executiveBrain.businessBoost}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Revenue
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-cyan-300">
+
+${executiveBrain.holidayRevenue}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8">
+
+<div className="text-sm text-white/40">
+
+Recommendation
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.holidayRecommendation}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-indigo-300">
+
+AI Demand Forecast
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-5">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Forecast
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.demandForecast}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Level
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-orange-300">
+
+{executiveBrain.demandLevelAI}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Confidence
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-emerald-300">
+
+{executiveBrain.demandConfidence}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Profit
+
+</div>
+
+<div className="mt-2 text-2xl font-bold text-yellow-300">
+
+${executiveBrain.expectedProfit}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Recommendation
+
+</div>
+
+<div className="mt-2 text-white text-sm">
+
+{executiveBrain.demandRecommendation}
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-red-300">
+
+AI Executive Decision Center
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Priority
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-red-300">
+
+{executiveBrain.executivePriorityLevel}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Confidence
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.executiveDecisionConfidence}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Decision
+
+</div>
+
+<div className="mt-2 text-white">
+
+{executiveBrain.executiveDecision}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8">
+
+<div className="mb-3 font-semibold text-orange-300">
+
+Executive Queue
+
+</div>
+
+{executiveBrain.executiveQueue.map(
+
+(item:string,index:number)=>(
+
+<div
+
+key={index}
+
+className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
+
+>
+
+• {item}
+
+</div>
+
+)
+
+)}
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-emerald-300">
+
+AI Autonomous Task Generator
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Task Priority
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-orange-300">
+
+{executiveBrain.taskPriority}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Business Impact
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-cyan-300">
+
+{executiveBrain.estimatedBusinessImpact}%
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Completion Time
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-purple-300">
+
+{executiveBrain.estimatedCompletionHours}h
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8">
+
+<div className="mb-3 font-semibold text-cyan-300">
+
+Generated Tasks
+
+</div>
+
+{executiveBrain.autonomousTasks.map(
+
+(task:string,index:number)=>(
+
+<div
+
+key={index}
+
+className="mb-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-sm text-white"
+
+>
+
+✓ {task}
+
+</div>
+
+)
+
+)}
+
+</div>
+
+</div>
+
+<div className="mt-10 rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
+
+<h2 className="mb-6 text-xl font-semibold text-red-300">
+
+AI Smart Alert Engine
+
+</h2>
+
+<div className="grid gap-6 lg:grid-cols-3">
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Alert Level
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-red-300">
+
+{executiveBrain.alertLevel}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Active Alerts
+
+</div>
+
+<div className="mt-2 text-3xl font-bold text-orange-300">
+
+{executiveBrain.alertCount}
+
+</div>
+
+</div>
+
+<div>
+
+<div className="text-sm text-white/40">
+
+Emergency Action
+
+</div>
+
+<div className="mt-2 text-sm text-white">
+
+{executiveBrain.emergencyAction}
+
+</div>
+
+</div>
+
+</div>
+
+<div className="mt-8">
+
+<div className="mb-3 font-semibold text-orange-300">
+
+Generated Alerts
+
+</div>
+
+{executiveBrain.smartAlerts.map(
+
+(alert:string,index:number)=>(
+
+<div
+
+key={index}
+
+className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
+
+>
+
+⚠ {alert}
+
+</div>
+
+)
+
+)}
 
 </div>
 

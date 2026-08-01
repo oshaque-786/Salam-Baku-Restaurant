@@ -150,6 +150,62 @@ let staffingStatus="Balanced";
 
 let staffingRecommendation="";
 
+let currentSeason="Summer";
+
+let seasonalGrowth=0;
+
+let seasonalRevenue=0;
+
+let seasonalOccupancy=0;
+
+let seasonalReservations=0;
+
+let seasonalRecommendation="";
+
+let eventName="Regular Day";
+
+let demandLevel="Normal";
+
+let businessBoost=0;
+
+let holidayRevenue=0;
+
+let holidayRecommendation="";
+
+let demandForecast=0;
+
+let demandLevelAI="Normal";
+
+let demandConfidence=95;
+
+let expectedProfit=0;
+
+let demandRecommendation="";
+
+let executivePriorityLevel="Medium";
+
+let executiveDecision="Maintain operations.";
+
+let executiveDecisionConfidence=95;
+
+const executiveQueue:string[]=[];
+
+const autonomousTasks:string[]=[];
+
+let taskPriority="Normal";
+
+let estimatedBusinessImpact=0;
+
+let estimatedCompletionHours=0;
+
+const smartAlerts:string[]=[];
+
+let alertLevel="Normal";
+
+let alertCount=0;
+
+let emergencyAction="";
+
 let todayFocus = "";
 
 const executiveAlerts:string[] = [];
@@ -1011,6 +1067,562 @@ staffingRecommendation=
 
 }
 
+const month=
+
+new Date().getMonth()+1;
+
+if(
+
+month>=3&&month<=5
+
+){
+
+currentSeason="Spring";
+
+seasonalGrowth=8;
+
+}
+
+else if(
+
+month>=6&&month<=8
+
+){
+
+currentSeason="Summer";
+
+seasonalGrowth=15;
+
+}
+
+else if(
+
+month>=9&&month<=11
+
+){
+
+currentSeason="Autumn";
+
+seasonalGrowth=5;
+
+}
+
+else{
+
+currentSeason="Winter";
+
+seasonalGrowth=-5;
+
+}
+
+seasonalRevenue=
+
+Math.round(
+
+data.expectedRevenue*
+
+(
+
+1+
+
+seasonalGrowth/100
+
+)
+
+);
+
+seasonalOccupancy=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+Math.round(
+
+data.occupancyRate+
+
+seasonalGrowth
+
+)
+
+)
+
+);
+
+seasonalReservations=
+
+Math.round(
+
+data.totalReservations*
+
+(
+
+1+
+
+seasonalGrowth/100
+
+)
+
+);
+
+if(seasonalGrowth>10){
+
+seasonalRecommendation=
+
+"Prepare for high customer demand.";
+
+}
+
+else if(seasonalGrowth>0){
+
+seasonalRecommendation=
+
+"Maintain current operations.";
+
+}
+
+else{
+
+seasonalRecommendation=
+
+"Launch seasonal promotions.";
+
+}
+
+const day=
+
+new Date().getDay();
+
+if(
+
+day===5||
+
+day===6
+
+){
+
+eventName="Weekend";
+
+businessBoost=20;
+
+}
+
+else{
+
+eventName="Weekday";
+
+businessBoost=0;
+
+}
+
+holidayRevenue=
+
+Math.round(
+
+seasonalRevenue*
+
+(
+
+1+
+
+businessBoost/100
+
+)
+
+);
+
+if(businessBoost>=20){
+
+demandLevel="High";
+
+holidayRecommendation=
+
+"Increase inventory and staffing.";
+
+}
+
+else{
+
+demandLevel="Normal";
+
+holidayRecommendation=
+
+"Standard operations are sufficient.";
+
+}
+
+demandForecast=
+
+Math.round(
+
+(
+
+predictedOccupancy+
+
+seasonalOccupancy
+
+)/2
+
+);
+
+expectedProfit=
+
+Math.round(
+
+holidayRevenue*0.35
+
+);
+
+if(demandForecast>=90){
+
+demandLevelAI="Extreme";
+
+demandRecommendation=
+
+"Maximum preparation required.";
+
+}
+
+else if(demandForecast>=75){
+
+demandLevelAI="High";
+
+demandRecommendation=
+
+"Increase staff and inventory.";
+
+}
+
+else if(demandForecast>=60){
+
+demandLevelAI="Moderate";
+
+demandRecommendation=
+
+"Normal operations.";
+
+}
+
+else{
+
+demandLevelAI="Low";
+
+demandRecommendation=
+
+"Run promotional campaigns.";
+
+demandConfidence-=10;
+
+}
+
+demandConfidence=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+demandConfidence
+
+)
+
+);
+
+if(healthScore<50){
+
+executivePriorityLevel="Critical";
+
+executiveDecision=
+
+"Immediate executive intervention required.";
+
+executiveQueue.push(
+
+"Restaurant health below 50%"
+
+);
+
+}
+
+else if(healthScore<70){
+
+executivePriorityLevel="High";
+
+executiveDecision=
+
+"Focus on operational improvements.";
+
+executiveQueue.push(
+
+"Improve restaurant performance"
+
+);
+
+}
+
+else if(healthScore<90){
+
+executivePriorityLevel="Medium";
+
+executiveDecision=
+
+"Maintain and optimize operations.";
+
+executiveQueue.push(
+
+"Continue monitoring"
+
+);
+
+}
+
+else{
+
+executivePriorityLevel="Excellent";
+
+executiveDecision=
+
+"Business performing exceptionally well.";
+
+executiveQueue.push(
+
+"Maintain current strategy"
+
+);
+
+}
+
+executiveDecisionConfidence=
+
+Math.max(
+
+0,
+
+Math.min(
+
+100,
+
+healthScore
+
+)
+
+);
+
+if(predictedOccupancy>=90){
+
+autonomousTasks.push(
+
+"Hire temporary staff"
+
+);
+
+autonomousTasks.push(
+
+"Increase food inventory"
+
+);
+
+taskPriority="Critical";
+
+estimatedBusinessImpact+=25;
+
+estimatedCompletionHours+=6;
+
+}
+
+else if(predictedOccupancy>=75){
+
+autonomousTasks.push(
+
+"Prepare additional tables"
+
+);
+
+autonomousTasks.push(
+
+"Increase delivery riders"
+
+);
+
+taskPriority="High";
+
+estimatedBusinessImpact+=18;
+
+estimatedCompletionHours+=4;
+
+}
+
+else if(predictedOccupancy>=60){
+
+autonomousTasks.push(
+
+"Maintain normal staffing"
+
+);
+
+taskPriority="Medium";
+
+estimatedBusinessImpact+=10;
+
+estimatedCompletionHours+=2;
+
+}
+
+else{
+
+autonomousTasks.push(
+
+"Launch promotional campaign"
+
+);
+
+autonomousTasks.push(
+
+"Offer discount packages"
+
+);
+
+taskPriority="Low";
+
+estimatedBusinessImpact+=5;
+
+estimatedCompletionHours+=1;
+
+}
+
+if(data.cancellationRate>20){
+
+autonomousTasks.push(
+
+"Contact cancelled customers"
+
+);
+
+estimatedBusinessImpact+=8;
+
+}
+
+if(data.weeklyGrowth<0){
+
+autonomousTasks.push(
+
+"Start customer retention campaign"
+
+);
+
+estimatedBusinessImpact+=10;
+
+}
+
+// ==========================================
+// SMART ALERT ENGINE
+// ==========================================
+
+if(data.expectedRevenue<3000){
+
+smartAlerts.push(
+
+"Revenue is below target."
+
+);
+
+alertCount++;
+
+}
+
+if(predictedOccupancy<60){
+
+smartAlerts.push(
+
+"Occupancy is critically low."
+
+);
+
+alertCount++;
+
+}
+
+if(data.cancellationRate>20){
+
+smartAlerts.push(
+
+"Cancellation rate is too high."
+
+);
+
+alertCount++;
+
+}
+
+if(kitchenStaffRequired>=6){
+
+smartAlerts.push(
+
+"Kitchen workload expected to be high."
+
+);
+
+alertCount++;
+
+}
+
+if(data.weeklyGrowth>15){
+
+smartAlerts.push(
+
+"Business growth is exceptional."
+
+);
+
+}
+
+if(alertCount>=3){
+
+alertLevel="Critical";
+
+emergencyAction=
+
+"Executive intervention required immediately.";
+
+}
+
+else if(alertCount===2){
+
+alertLevel="High";
+
+emergencyAction=
+
+"Management review recommended.";
+
+}
+
+else if(alertCount===1){
+
+alertLevel="Medium";
+
+emergencyAction=
+
+"Monitor operations closely.";
+
+}
+
+else{
+
+alertLevel="Normal";
+
+emergencyAction=
+
+"No emergency actions required.";
+
+}
+
 return{
 
 healthScore,
@@ -1110,6 +1722,62 @@ deliveryStaffRequired,
 staffingStatus,
 
 staffingRecommendation,
+
+currentSeason,
+
+seasonalGrowth,
+
+seasonalRevenue,
+
+seasonalOccupancy,
+
+seasonalReservations,
+
+seasonalRecommendation,
+
+eventName,
+
+demandLevel,
+
+businessBoost,
+
+holidayRevenue,
+
+holidayRecommendation,
+
+demandForecast,
+
+demandLevelAI,
+
+demandConfidence,
+
+expectedProfit,
+
+demandRecommendation,
+
+executivePriorityLevel,
+
+executiveDecision,
+
+executiveDecisionConfidence,
+
+executiveQueue,
+
+autonomousTasks,
+
+taskPriority,
+
+estimatedBusinessImpact,
+
+estimatedCompletionHours,
+
+smartAlerts,
+
+alertLevel,
+
+alertCount,
+
+emergencyAction,
 
 };
 
