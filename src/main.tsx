@@ -5,6 +5,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { useAuth } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // Browser idle callback (non-blocking)
 if ("requestIdleCallback" in window) {
@@ -16,8 +17,11 @@ if ("requestIdleCallback" in window) {
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
+
       <Toaster position="top-right" reverseOrder={false} />
     </AuthProvider>
-  </StrictMode>,
+  </StrictMode>
 );
