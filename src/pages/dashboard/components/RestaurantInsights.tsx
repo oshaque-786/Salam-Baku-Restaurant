@@ -88,7 +88,10 @@ const occupancyData = [
     <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
 
       <div className="mb-6 flex items-center gap-2">
-        <Brain className="h-5 w-5 text-cyan-400" />
+        <Brain
+          aria-hidden="true"
+          className="h-5 w-5 text-cyan-400"
+        />
 
         <h2 className="text-lg font-semibold text-white">
           Restaurant Intelligence
@@ -109,7 +112,10 @@ const occupancyData = [
 
             {insights.trendDirection === "up" ? (
 
-              <TrendingUp className="h-7 w-7 text-green-400" />
+              <TrendingUp
+                aria-hidden="true"
+                className="h-7 w-7 text-green-400"
+              />
 
             ) : (
 
@@ -179,7 +185,10 @@ const occupancyData = [
 
           <div className="mb-2 flex items-center gap-2">
 
-            <Target className="h-5 w-5 text-green-400" />
+            <Target
+              aria-hidden="true"
+              className="h-5 w-5 text-green-400"
+            />
 
             <span className="text-sm text-white/50">
               Health Score
@@ -207,7 +216,9 @@ const occupancyData = [
 
           <div className="mb-5 flex items-center gap-2">
 
-            <Activity className="h-5 w-5 text-cyan-400" />
+            <Activity
+              aria-hidden="true"
+              className="h-5 w-5 text-cyan-400"
 
             <h3 className="font-semibold text-white">
 
@@ -267,7 +278,10 @@ const occupancyData = [
 
             <div className="mb-3 flex items-center gap-2">
 
-              <DollarSign className="h-5 w-5 text-green-400" />
+              <DollarSign
+                aria-hidden="true"
+                className="h-5 w-5 text-green-400"
+              />
 
               <span className="text-sm text-white/50">
                 Expected Revenue
@@ -296,7 +310,10 @@ const occupancyData = [
 
             <div className="mb-3 flex items-center gap-2">
 
-              <Users className="h-5 w-5 text-cyan-400" />
+              <Users
+                aria-hidden="true"
+                className="h-5 w-5 text-cyan-400"
+              />
 
               <span className="text-sm text-white/50">
 
@@ -390,7 +407,10 @@ const occupancyData = [
 
           <div className="mb-6 flex items-center gap-3">
 
-            <Activity className="h-6 w-6 text-cyan-400" />
+            <Activity
+              aria-hidden="true"
+              className="h-6 w-6 text-cyan-400"
+            />
 
             <h3 className="text-xl font-semibold text-white">
 
@@ -514,7 +534,10 @@ const occupancyData = [
 
           <div className="mb-3 flex items-center gap-2">
 
-            <Brain className="h-6 w-6 text-cyan-400" />
+            <Brain
+              aria-hidden="true"
+              className="h-6 w-6 text-cyan-400"
+            />
 
             <span className="text-lg font-semibold text-cyan-300">
 
@@ -540,7 +563,10 @@ EXECUTIVE DECISION CENTER
 
   <div className="mb-5 flex items-center gap-3">
 
-    <BrainCircuit className="h-7 w-7 text-cyan-400" />
+    <BrainCircuit
+      aria-hidden="true"
+      className="h-7 w-7 text-cyan-400"
+    />
 
     <div>
 
@@ -712,8 +738,10 @@ AI ACTION PLANNER
 
   <div className="mb-5 flex items-center gap-3">
 
-    <Activity className="h-6 w-6 text-cyan-400" />
-
+    <Activity
+      aria-hidden="true"
+      className="h-6 w-6 text-cyan-400"
+    />
     <div>
 
       <h2 className="text-xl font-semibold text-white">
@@ -888,9 +916,15 @@ Manager Productivity
 EXECUTIVE AI BRAIN
 ========================================== */}
 
-<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-6">
+<section
+  aria-labelledby="executive-ai-heading"
+  className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-6"
+>
 
-  <h2 className="mb-6 text-xl font-semibold text-cyan-300">
+  <h2
+  id="executive-ai-heading"
+  className="mb-6 text-xl font-semibold text-cyan-300"
+>
     Executive AI Brain
   </h2>
 
@@ -1010,11 +1044,24 @@ EXECUTIVE AI BRAIN
 
     <div>
 
-      <div className="mb-3 font-semibold text-red-400">
-        Executive Warnings
-      </div>
+  <div className="mb-3 font-semibold text-red-400">
+    Executive Warnings
+  </div>
 
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
+  {executiveBrain.executiveWarnings.map(
+    (item: string, index: number) => (
+      <div
+        key={index}
+        className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-200"
+      >
+        ⚠ {item}
+      </div>
+    )
+  )}
+
+</div>
+
+</div>
 
 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
 
@@ -1180,21 +1227,19 @@ AI Summary
 
 <div>
 
-<div className="text-sm text-white/40">
+  <div className="text-sm text-white/40">
+    CEO Decision
+  </div>
 
-CEO Decision
-
-</div>
-
-<div className="mt-2 text-cyan-300">
-
-{executiveBrain.ceoDecision}
-
-</div>
+  <div className="mt-2 text-cyan-300">
+    {executiveBrain.ceoDecision}
+  </div>
 
 </div>
 
 <div>
+
+</section>
 
 <div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
 
@@ -3131,7 +3176,10 @@ AI Predictive Business Intelligence
 
 <div className="flex items-center gap-3">
 
-<DollarSign className="h-8 w-8 text-emerald-400"/>
+<DollarSign
+  aria-hidden="true"
+  className="h-8 w-8 text-emerald-400"
+/>
 
 <div>
 
@@ -3157,7 +3205,10 @@ ${insights.predictedRevenue}
 
 <div className="flex items-center gap-3">
 
-<Users className="h-8 w-8 text-cyan-400"/>
+<Users
+  aria-hidden="true"
+  className="h-8 w-8 text-cyan-400"
+/>
 
 <div>
 
@@ -3209,7 +3260,10 @@ Cancellation Risk
 
 <div className="flex items-center gap-3">
 
-<BrainCircuit className="h-8 w-8 text-violet-400"/>
+<BrainCircuit
+  aria-hidden="true"
+  className="h-8 w-8 text-violet-400"
+/>
 
 <div>
 
@@ -3397,7 +3451,10 @@ KPI GAUGES
 
 <div className="mb-4 flex items-center gap-2">
 
-<Activity className="h-5 w-5 text-emerald-400"/>
+<Activity
+  aria-hidden="true"
+  className="h-5 w-5 text-emerald-400"
+/>
 
 <span className="text-white">
 
@@ -3477,7 +3534,10 @@ cornerRadius={12}
 
 <div className="mb-4 flex items-center gap-2">
 
-<BrainCircuit className="h-5 w-5 text-violet-400"/>
+<BrainCircuit
+  aria-hidden="true"
+  className="h-5 w-5 text-violet-400"
+/>
 
 <span className="text-white">
 
@@ -3583,7 +3643,10 @@ Occupancy
 
 <div className="mb-4 flex items-center gap-2">
 
-<DollarSign className="h-5 w-5 text-orange-400"/>
+<DollarSign
+  aria-hidden="true"
+  className="h-5 w-5 text-orange-400"
+/>
 
 <span className="text-white">
 

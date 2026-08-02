@@ -75,39 +75,43 @@ export default function App() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-brand-dark font-sans selection:bg-brand-neon selection:text-brand-dark">
-      <Navbar />
+return (
+  <div className="min-h-screen bg-brand-dark font-sans selection:bg-brand-neon selection:text-brand-dark">
+    <Navbar />
 
-      <main>
-        <Hero />
+    <main
+      id="main-content"
+      role="main"
+      aria-label="Main Content"
+    >
+      <Hero />
 
-        <Suspense fallback={<LoadingSection />}>
-          <Features />
+      <Suspense fallback={<LoadingSection />}>
+        <Features />
 
-          <MenuHighlights />
+        <MenuHighlights />
 
-          <FullMenu />
+        <FullMenu />
 
-          <Reservation />
+        <Reservation />
 
-          <Gallery />
+        <Gallery />
 
-          <Testimonials />
+        <Testimonials />
 
-          <TrustSection />
+        <TrustSection />
 
-          <FAQ />
+        <FAQ />
 
-          <About />
+        <About />
 
-          <ContactLocation />
-        </Suspense>
-      </main>
+        <ContactLocation />
+      </Suspense>
+    </main>
 
-      <Footer />
+    <Footer />
 
-      <WhatsAppWidget />
-    </div>
-  );
+    <WhatsAppWidget />
+  </div>
+);
 }
