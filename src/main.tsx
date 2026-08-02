@@ -6,11 +6,12 @@ import { useAuth } from "./context/AuthContext";
 import App from "./App";
 import "./index.css";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { logger } from "./utils/logger";
 
 // Browser idle callback (non-blocking)
 if ("requestIdleCallback" in window) {
   window.requestIdleCallback(() => {
-    console.log("Idle Loaded");
+    logger.debug("Idle Loaded");
   });
 }
 

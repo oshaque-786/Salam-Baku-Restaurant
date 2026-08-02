@@ -652,8 +652,7 @@ export default function AdminDashboard({
     };
   }, [filteredReservations]);
 
-  const insights = useDashboardInsights(filteredReservations);
-
+const insights = useDashboardInsights(filteredReservations);
 const executiveBrain=
 useExecutiveAIBrain({
 totalReservations:
@@ -669,6 +668,40 @@ insights.cancellationRate,
 confirmationRate:
 insights.confirmationRate,
 });
+
+const aiCommands = useMemo(
+  () => ({
+    exportCSV: () => exportReservationsCSV(filteredReservations),
+
+    print: () => printReservations(filteredReservations),
+
+    openNotifications: () => setShowNotifications(true),
+
+    scrollAnalytics: () =>
+      window.scrollTo({
+        top: 1300,
+        behavior: "smooth",
+      }),
+
+    logout: () => handleLogout(),
+
+    executiveBrain,
+  }),
+  [
+    filteredReservations,
+    executiveBrain,
+  ]
+);
+
+const memoizedInsights = useMemo(
+  () => insights,
+  [insights]
+);
+
+const memoizedExecutiveBrain = useMemo(
+  () => executiveBrain,
+  [executiveBrain]
+);
 
   const {
     currentPage,
@@ -1410,8 +1443,8 @@ return (
         />
 
         <RestaurantInsights
-          insights={insights}
-          executiveBrain={executiveBrain}
+          insights={memoizedInsights}
+          executiveBrain={memoizedExecutiveBrain}
         />
 
         <AIRestaurantCopilot
@@ -1428,17 +1461,7 @@ return (
         expectedReservations:
         insights.expectedReservations,
         }}
-        commands={{
-        exportCSV:()=>exportReservationsCSV(filteredReservations),
-        print:()=>printReservations(filteredReservations),
-        openNotifications:()=>setShowNotifications(true),
-        scrollAnalytics:()=>
-        window.scrollTo({
-        top:1300,
-        behavior:"smooth",
-        }),
-        logout:()=>handleLogout(),
-        }}
+        commands={aiCommands}
         />
 
         <DashboardInsights

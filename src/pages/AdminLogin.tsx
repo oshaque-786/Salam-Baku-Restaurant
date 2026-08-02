@@ -3,6 +3,7 @@ import { useState } from "react";
 import { LazyMotion, domAnimation, m } from "motion/react";
 import { Eye, EyeOff, Mail, Lock } from "lucide-react";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
 
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -41,7 +42,7 @@ function AdminLogin() {
 
       window.location.hash = "#admin";
     } catch (error) {
-      console.error(error);
+      logger.error(error);
 
       toast.error("Invalid Email or Password");
     } finally {

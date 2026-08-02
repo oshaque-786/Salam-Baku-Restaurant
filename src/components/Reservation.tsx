@@ -5,6 +5,7 @@ import {
 } from "../services/reservationService";
 
 import { LazyMotion, domAnimation, m } from "motion/react";
+import { logger } from "../utils/logger";
 
 import {
   Calendar,
@@ -34,7 +35,7 @@ export default function Reservation() {
 
         setReservationEnabled(enabled);
       } catch (error) {
-        console.error(error);
+        logger.error(error);
       }
     };
 
@@ -46,7 +47,7 @@ export default function Reservation() {
 
     setIsSubmitting(true);
 
-    console.log("Reservation Submit Started");
+    logger.debug("Reservation Submit Started");
 
     const formData = new FormData(e.currentTarget);
 
@@ -60,7 +61,7 @@ export default function Reservation() {
       status: "pending",
     };
 
-    console.log("Reservation Data:", data);
+    logger.debug("Reservation Data:", data);
 
     const today = new Date();
 
@@ -107,9 +108,9 @@ export default function Reservation() {
     }
 
     try {
-      console.log("Saving to Firestore...");
+      logger.debug("Saving to Firestore...");
       await createReservation(data);
-      console.log("Reservation Saved Successfully");
+      logger.debug("Reservation Saved Successfully");
       setIsSuccess(true);
 
       // WhatsApp notification logic
@@ -129,9 +130,9 @@ export default function Reservation() {
       (e.target as HTMLFormElement).reset();
       setTimeout(() => setIsSuccess(false), 5000);
     } catch (error) {
-      console.error("Reservation Error:", error);
+      logger.error("Reservation Error:", error);
 
-      console.error("Firestore Error:", error);
+      logger.error("Firestore Error:", error);
 
       alert(error instanceof Error ? error.message : String(error));
 

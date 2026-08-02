@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
 
 import {
   fetchSettings as fetchSettingsService,
@@ -22,7 +23,7 @@ export function useDashboardSettings() {
         settings.reservationEnabled
       );
     } catch (error) {
-      console.error(error);
+      logger.error(error);
     }
   }, []);
 
@@ -48,7 +49,7 @@ export function useDashboardSettings() {
             : "Reservations Disabled"
         );
       } catch (error) {
-        console.error(error);
+        logger.error(error);
 
         toast.error(
           "Unable to update settings."

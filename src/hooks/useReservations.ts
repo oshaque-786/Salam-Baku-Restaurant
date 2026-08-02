@@ -4,6 +4,7 @@
 
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
+import { logger } from "../utils/logger";
 
 import type { ReservationData } from "../types/reservation";
 
@@ -34,7 +35,7 @@ export function useReservations() {
       const data = await fetchReservations();
       setReservations(data);
     } catch (error: any) {
-      console.error(error);
+      logger.error(error);
       setDataError(
         error?.message ?? "Unable to fetch reservations."
       );
@@ -59,7 +60,7 @@ export function useReservations() {
 
         await refreshReservations();
       } catch (error) {
-        console.error(error);
+        logger.error(error);
 
         toast.error(
           "Unable to update reservation."
@@ -90,7 +91,7 @@ export function useReservations() {
 
         await refreshReservations();
       } catch (error) {
-        console.error(error);
+        logger.error(error);
 
         toast.error(
           "Unable to delete reservation."
