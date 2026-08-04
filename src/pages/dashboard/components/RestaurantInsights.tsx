@@ -708,15 +708,15 @@ EXECUTIVE DECISION CENTER
 AI ACTION PLANNER
 ========================================== */}
 
-<div className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-6">
+<div className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-4 md:p-6">
 
-  <div className="mb-5 flex items-center gap-3">
+  <div className="mb-5 flex items-start gap-3 md:items-center">
 
     <Activity className="h-6 w-6 text-cyan-400" />
 
     <div>
 
-      <h2 className="text-xl font-semibold text-white">
+      <h2 className="text-lg md:text-xl font-semibold text-white">
         AI Action Planner
       </h2>
 
@@ -734,7 +734,7 @@ AI ACTION PLANNER
 
       <div
         key={index}
-        className="flex items-center justify-between rounded-lg border border-white/10 bg-slate-900 px-4 py-3"
+        className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between rounded-lg border border-white/10 bg-slate-900 px-4 py-3"
       >
 
         <div>
@@ -749,7 +749,7 @@ AI ACTION PLANNER
 
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
 
           <input
             type="checkbox"
