@@ -95,11 +95,11 @@ const occupancyData = [
         </h2>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
         {/* Weekly Growth */}
 
-        <div className="rounded-xl border border-white/10 bg-slate-800 p-5">
+        <div className="rounded-xl border border-white/10 bg-slate-800 p-4 sm:p-5">
 
           <div className="mb-2 text-sm text-white/50">
             Weekly Growth
@@ -119,7 +119,7 @@ const occupancyData = [
 
             <div>
 
-              <div className="text-2xl font-bold text-white">
+              <div className="text-xl font-bold text-white sm:text-2xl">
                 {insights.weeklyGrowth}%
               </div>
 
@@ -1553,7 +1553,7 @@ AI Revenue Forecast
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -1745,7 +1745,7 @@ AI Occupancy Prediction
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -1937,7 +1937,7 @@ AI Event & Holiday Impact
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -2491,7 +2491,7 @@ Restaurant CEO Dashboard
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -2753,7 +2753,7 @@ Customer Intelligence
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -2835,7 +2835,7 @@ Loyalty & VIP Insights
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
@@ -3087,7 +3087,7 @@ AI Predictive Business Intelligence
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-4">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
 
@@ -3351,7 +3351,7 @@ radius={[8,8,0,0]}
 KPI GAUGES
 ========================================== */}
 
-<div className="mt-8 grid gap-6 lg:grid-cols-4">
+<div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
 {/* Restaurant Health */}
 
