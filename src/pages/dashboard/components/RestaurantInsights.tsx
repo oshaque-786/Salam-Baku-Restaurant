@@ -1018,7 +1018,7 @@ EXECUTIVE AI BRAIN
 
 <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
 
-<h3 className="mb-4 font-semibold text-emerald-300">
+<h3 className="mb-3 text-base md:text-lg font-semibold text-emerald-300">
 
 Revenue Strategy
 
@@ -1030,7 +1030,7 @@ Revenue Strategy
 
 <div key={index}
 
-className="mb-2 text-sm text-white">
+className="mb-2 text-xs md:text-sm text-white">
 
 • {item}
 
@@ -1042,7 +1042,7 @@ className="mb-2 text-sm text-white">
 
 </div>
 
-<div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+<div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 md:p-5">
 
 <h3 className="mb-4 font-semibold text-cyan-300">
 
@@ -3089,7 +3089,7 @@ AI Predictive Business Intelligence
 
 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
 
-<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
 
 <div className="flex items-center gap-3">
 
