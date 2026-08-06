@@ -888,9 +888,9 @@ Manager Productivity
 EXECUTIVE AI BRAIN
 ========================================== */}
 
-<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-6">
+<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-4 md:p-6">
 
-  <h2 className="mb-6 text-xl font-semibold text-cyan-300">
+  <h2 className="mb-6 text-lg md:text-xl font-semibold text-cyan-300">
     Executive AI Brain
   </h2>
 
@@ -924,7 +924,7 @@ EXECUTIVE AI BRAIN
 
   {/* Insights / Risks / Opportunities */}
 
-  <div className="grid gap-6 lg:grid-cols-3">
+  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 
     <div>
 
