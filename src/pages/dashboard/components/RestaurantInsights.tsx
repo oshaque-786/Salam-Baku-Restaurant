@@ -1196,7 +1196,7 @@ CEO Decision
 
 <div>
 
-<div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
+<div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4 md:p-6">
 
 <h2 className="mb-6 text-xl font-semibold text-purple-300">
 
@@ -1290,7 +1290,7 @@ Business Intelligence Scorecard
 Profitability
 </div>
 
-<div className="mt-2 text-3xl font-bold text-emerald-400">
+<div className="mt-2 text-2xl md:text-3xl font-bold text-emerald-400">
 {executiveBrain.profitabilityScore}%
 </div>
 
@@ -1631,7 +1631,7 @@ AI Reservation Forecast
 
 </h2>
 
-<div className="grid gap-6 lg:grid-cols-3">
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
 <div>
 
@@ -1683,7 +1683,7 @@ Next Month
 
 </div>
 
-<div className="mt-8 grid gap-6 lg:grid-cols-3">
+<div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
 <div>
 
@@ -1737,7 +1737,7 @@ Risk
 
 </div>
 
-<div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-6">
+<div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4 md:p-6">
 
 <h2 className="mb-6 text-xl font-semibold text-orange-300">
 
