@@ -936,7 +936,7 @@ EXECUTIVE AI BRAIN
         (item: string, index: number) => (
           <div
             key={index}
-            className="mb-2 text-sm text-white"
+            className="mb-2 text-xs md:text-sm text-white"
           >
             • {item}
           </div>
@@ -955,7 +955,7 @@ EXECUTIVE AI BRAIN
         (item: string, index: number) => (
           <div
             key={index}
-            className="mb-2 text-sm text-white"
+            className="mb-2 text-xs md:text-sm text-white"
           >
             • {item}
           </div>
@@ -974,7 +974,7 @@ EXECUTIVE AI BRAIN
         (item: string, index: number) => (
           <div
             key={index}
-            className="mb-2 text-sm text-white"
+            className="mb-2 text-xs md:text-sm text-white"
           >
             • {item}
           </div>
@@ -987,7 +987,7 @@ EXECUTIVE AI BRAIN
 
   {/* Executive Actions / Warnings */}
 
-  <div className="mt-8 grid gap-6 lg:grid-cols-2">
+  <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
 
     <div>
 
@@ -1016,7 +1016,7 @@ EXECUTIVE AI BRAIN
 
 <div className="mt-8 grid gap-6 lg:grid-cols-2">
 
-<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5">
+<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
 
 <h3 className="mb-4 font-semibold text-emerald-300">
 
