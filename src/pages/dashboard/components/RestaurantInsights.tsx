@@ -1349,37 +1349,37 @@ Multi-Branch Comparison
 
 <div className="overflow-x-auto">
 
-<table className="w-full text-left">
+<table className="min-w-[720px] w-full text-left">
 
 <thead>
 
 <tr className="border-b border-white/10">
 
-<th className="pb-3 text-white/50">
+<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
 
 Branch
 
 </th>
 
-<th className="pb-3 text-white/50">
+<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
 
 Revenue
 
 </th>
 
-<th className="pb-3 text-white/50">
+<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
 
 Occupancy
 
 </th>
 
-<th className="pb-3 text-white/50">
+<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
 
 Growth
 
 </th>
 
-<th className="pb-3 text-white/50">
+<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
 
 Status
 
@@ -1400,31 +1400,31 @@ key={index}
 className="border-b border-white/5"
 >
 
-<td className="py-3 text-white">
+<td className="px-2 py-3 text-xs md:text-sm text-white">
 
 {branch.branch}
 
 </td>
 
-<td className="py-3 text-emerald-300">
+<td className="px-2 py-3 text-xs md:text-sm text-emerald-300">
 
 ${branch.revenue}
 
 </td>
 
-<td className="py-3 text-cyan-300">
+<td className="px-2 py-3 text-xs md:text-sm text-cyan-300">
 
 {branch.occupancy}%
 
 </td>
 
-<td className="py-3 text-yellow-300">
+<td className="px-2 py-3 text-xs md:text-sm text-yellow-300">
 
 {branch.growth}%
 
 </td>
 
-<td className="py-3 text-pink-300">
+<td className="px-2 py-3 text-xs md:text-sm text-pink-300">
 
 {branch.status}
 
