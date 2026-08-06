@@ -898,7 +898,7 @@ EXECUTIVE AI BRAIN
 
   <div className="mb-6">
 
-    <div className="text-sm text-white/40">
+    <div className="text-xs md:text-sm text-white/40">
       Restaurant Health
     </div>
 
