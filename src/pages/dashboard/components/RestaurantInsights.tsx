@@ -902,7 +902,7 @@ EXECUTIVE AI BRAIN
       Restaurant Health
     </div>
 
-    <div className="mt-2 text-4xl font-bold text-cyan-300">
+    <div className="mt-2 text-3xl md:text-4xl font-bold text-cyan-300">
       {executiveBrain.healthScore}%
     </div>
 
@@ -910,13 +910,13 @@ EXECUTIVE AI BRAIN
 
   {/* Executive Priority */}
 
-  <div className="mb-8 rounded-xl border border-cyan-500/20 bg-slate-800 p-4">
+  <div className="mb-8 rounded-xl border border-cyan-500/20 bg-slate-800 p-4 md:p-5">
 
     <div className="text-sm text-white/40">
       Executive Priority
     </div>
 
-    <div className="mt-2 text-2xl font-bold text-orange-400">
+    <div className="mt-2 text-xl md:text-2xl font-bold text-orange-400">
       {executiveBrain.executivePriority}
     </div>
 
