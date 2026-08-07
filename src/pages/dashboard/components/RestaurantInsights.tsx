@@ -2023,7 +2023,7 @@ Recommendation
 
 </div>
 
-<div className="mt-10 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6">
+<div className="mt-8 md:mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 md:p-6">
 
 <h2 className="mb-6 text-xl font-semibold text-indigo-300">
 
