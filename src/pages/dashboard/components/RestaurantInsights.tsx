@@ -1553,17 +1553,17 @@ AI Revenue Forecast
 
 </h2>
 
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
 <div>
 
-<div className="text-sm text-white/40">
+<div className="text-xs md:text-sm text-white/40">
 
 Next Week
 
 </div>
 
-<div className="mt-2 text-3xl font-bold text-emerald-300">
+<div className="mt-2 text-2xl md:text-3xl font-bold text-emerald-300">
 
 ${executiveBrain.nextWeekRevenue}
 
@@ -2611,7 +2611,7 @@ Priority
 
 </div>
 
-<div className="mt-8 rounded-xl bg-violet-500/10 p-5">
+<div className="mt-8 rounded-xl bg-violet-500/10 p-4 md:p-5">
 
 <div className="text-sm text-white/40">
 
