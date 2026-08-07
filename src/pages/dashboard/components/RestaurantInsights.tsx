@@ -3351,11 +3351,11 @@ radius={[8,8,0,0]}
 KPI GAUGES
 ========================================== */}
 
-<div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+<div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
 {/* Restaurant Health */}
 
-<div className="rounded-xl border border-emerald-500/20 bg-slate-800 p-5">
+<div className="rounded-xl border border-emerald-500/20 bg-slate-800 p-4 md:p-5">
 
 <div className="mb-4 flex items-center gap-2">
 
@@ -3435,7 +3435,7 @@ cornerRadius={12}
 
 {/* AI Confidence */}
 
-<div className="rounded-xl border border-violet-500/20 bg-slate-800 p-5">
+<div className="rounded-xl border border-violet-500/20 bg-slate-800 p-4 md:p-5">
 
 <div className="mb-4 flex items-center gap-2">
 
@@ -3513,7 +3513,7 @@ cornerRadius={12}
 
 {/* Occupancy */}
 
-<div className="rounded-xl border border-cyan-500/20 bg-slate-800 p-5">
+<div className="rounded-xl border border-cyan-500/20 bg-slate-800 p-4 md:p-5">
 
 <div className="mb-4 flex items-center gap-2">
 
@@ -3529,7 +3529,7 @@ Occupancy
 
 <div className="text-center">
 
-<div className="text-3xl font-bold text-cyan-300">
+<div className="text-2xl md:text-3xl font-bold text-cyan-300">
 
 {insights.occupancyForecast}%
 
@@ -3541,7 +3541,7 @@ Occupancy
 
 {/* Revenue Confidence */}
 
-<div className="rounded-xl border border-orange-500/20 bg-slate-800 p-5">
+<div className="rounded-xl border border-orange-500/20 bg-slate-800 p-4 md:p-5">
 
 <div className="mb-4 flex items-center gap-2">
 
@@ -3557,7 +3557,7 @@ Revenue Confidence
 
 <div className="text-center">
 
-<div className="text-3xl font-bold text-orange-300">
+<div className="text-2xl md:text-3xl font-bold text-orange-300">
 
 {insights.revenueConfidence}%
 
