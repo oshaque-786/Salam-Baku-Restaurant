@@ -3273,7 +3273,7 @@ Revenue Projection
 
 <div className="h-72">
 
-<ResponsiveContainer>
+<ResponsiveContainer width="100%" height="100%">
 
 <AreaChart data={insights.forecastNextWeek}>
 
@@ -3317,7 +3317,7 @@ Occupancy Forecast
 
 <div className="h-72">
 
-<ResponsiveContainer>
+<ResponsiveContainer width="100%" height="100%">
 
 <BarChart data={insights.forecastNextWeek}>
 
