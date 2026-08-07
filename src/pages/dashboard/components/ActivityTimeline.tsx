@@ -118,22 +118,6 @@ function ActivityTimeline({ activities }: Props) {
 
 const groupedActivities = useMemo(() => {
 
-const totalActivities =
-  filteredActivities.length;
-
-const todayActivities =
-  groupedActivities.today.length;
-
-const createdActivities =
-  filteredActivities.filter(
-    (a) => a.type === "created"
-  ).length;
-
-const deletedActivities =
-  filteredActivities.filter(
-    (a) => a.type === "deleted"
-  ).length;
-
   return {
 
     today: filteredActivities.filter(
