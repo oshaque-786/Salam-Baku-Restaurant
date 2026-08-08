@@ -69,13 +69,14 @@ function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700 px-4">
-      <m.div
-        initial={{ opacity: 0, y: 35 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
-        className="w-full max-w-md rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8"
-      >
+    <LazyMotion features={domAnimation}>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-700 via-indigo-700 to-purple-700 px-4">
+        <m.div
+          initial={{ opacity: 0, y: 35 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45 }}
+          className="w-full max-w-md rounded-3xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl p-8"
+        >
         <h1 className="text-4xl font-bold text-white mb-2">Welcome</h1>
 
         <p className="text-white/70 mb-8">Sign in to your admin account</p>
@@ -175,6 +176,7 @@ function AdminLogin() {
         </div>
       </m.div>
     </div>
+   </LazyMotion>
   );
 }
 

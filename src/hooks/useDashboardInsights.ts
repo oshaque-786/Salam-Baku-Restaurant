@@ -261,9 +261,9 @@ const trendIcon =
 // ==========================================
 
 const averageDailyReservations =
-  Math.round(
-    currentWeekTotal / 7
-  );
+  currentWeekTotal > 0
+    ? currentWeekTotal / 7
+    : 0;
 
 const forecastNextWeek = Array.from(
   { length: 7 },
@@ -273,25 +273,24 @@ const forecastNextWeek = Array.from(
       weeklyGrowth / 100;
 
     const prediction =
-      Math.max(
-        0,
-        Math.round(
-          averageDailyReservations *
-          (1 + growthFactor)
-        )
-      );
+      currentWeekTotal > 0
+        ? Math.max(
+            1,
+            Math.round(
+              averageDailyReservations *
+                (1 + growthFactor)
+            )
+          )
+        : 0;
 
     return {
-
       day: format(
         addDays(new Date(), index + 1),
         "EEE"
       ),
 
       predicted: prediction,
-
     };
-
   }
 );
 
