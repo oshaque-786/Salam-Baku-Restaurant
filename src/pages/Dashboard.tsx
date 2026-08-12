@@ -638,19 +638,25 @@ export default function AdminDashboard({
   );
 
   const dashboardStats = useMemo(() => {
-    return {
+    const stats = {
       total: filteredReservations.length,
-      pending: filteredReservations.filter(
-        (r) => r.status === "pending"
-      ).length,
-      confirmed: filteredReservations.filter(
-        (r) => r.status === "confirmed"
-      ).length,
-      cancelled: filteredReservations.filter(
-        (r) => r.status === "cancelled"
-      ).length,
+      pending: 0,
+      confirmed: 0,
+      cancelled: 0,
     };
-  }, [filteredReservations]);
+
+  for (const reservation of filteredReservations) {
+    if (reservation.status === "pending") {
+      stats.pending += 1;
+    } else if (reservation.status === "confirmed") {
+      stats.confirmed += 1;
+    } else if (reservation.status === "cancelled") {
+      stats.cancelled += 1;
+    }
+  }
+
+  return stats;
+}, [filteredReservations]);
 
 const insights = useDashboardInsights(filteredReservations);
 const executiveBrain =
@@ -680,6 +686,16 @@ const executiveBrain =
       insights.confirmationRate,
   });
 
+const copilotDashboard = {
+  totalReservations: dashboardStats.total,
+  confirmedReservations: dashboardStats.confirmed,
+  cancelledReservations: dashboardStats.cancelled,
+  expectedRevenue: insights.expectedRevenue,
+  weeklyGrowth: insights.weeklyGrowth,
+  occupancyRate: insights.occupancyRate,
+  expectedReservations: insights.expectedReservations,
+};
+
 const aiCommands = useMemo(
   () => ({
     exportCSV: () => exportReservationsCSV(filteredReservations),
@@ -702,16 +718,6 @@ const aiCommands = useMemo(
     filteredReservations,
     executiveBrain,
   ]
-);
-
-const memoizedInsights = useMemo(
-  () => insights,
-  [insights]
-);
-
-const memoizedExecutiveBrain = useMemo(
-  () => executiveBrain,
-  [executiveBrain]
 );
 
   const {
@@ -1454,25 +1460,13 @@ return (
         />
 
         <RestaurantInsights
-          insights={memoizedInsights}
-          executiveBrain={memoizedExecutiveBrain}
+          insights={insights}
+          executiveBrain={executiveBrain}
         />
 
         <AIRestaurantCopilot
-        dashboard={{
-        totalReservations,
-        confirmedReservations,
-        cancelledReservations,
-        expectedRevenue:
-        insights.expectedRevenue,
-        weeklyGrowth:
-        insights.weeklyGrowth,
-        occupancyRate:
-        insights.occupancyRate,
-        expectedReservations:
-        insights.expectedReservations,
-        }}
-        commands={aiCommands}
+          dashboard={copilotDashboard}
+          commands={aiCommands}
         />
 
         <DashboardInsights
