@@ -653,21 +653,32 @@ export default function AdminDashboard({
   }, [filteredReservations]);
 
 const insights = useDashboardInsights(filteredReservations);
-const executiveBrain=
-useExecutiveAIBrain({
-totalReservations:
-insights.totalReservations,
-expectedRevenue:
-insights.expectedRevenue,
-weeklyGrowth:
-insights.weeklyGrowth,
-occupancyRate:
-insights.occupancyRate,
-cancellationRate:
-insights.cancellationRate,
-confirmationRate:
-insights.confirmationRate,
-});
+const executiveBrain =
+  useExecutiveAIBrain({
+    totalReservations:
+      insights.totalReservations,
+
+    expectedRevenue:
+      insights.expectedRevenue,
+
+    expectedGuests:
+      insights.expectedGuests,
+
+    forecastOccupancy:
+      insights.forecastOccupancy,
+
+    weeklyGrowth:
+      insights.weeklyGrowth,
+
+    occupancyRate:
+      insights.occupancyRate,
+
+    cancellationRate:
+      insights.cancellationRate,
+
+    confirmationRate:
+      insights.confirmationRate,
+  });
 
 const aiCommands = useMemo(
   () => ({
@@ -1495,43 +1506,34 @@ return (
           />
         ) : (
           <>
-            isLoadingData ? (
+            {isLoadingData ? (
               <ReservationTableSkeleton />
             ) : (
               <ReservationTable
-              reservations={currentReservations}
-
-              onConfirm={(id) =>
-                changeReservationStatus(id, "confirmed")
-              }
-
-              onCancel={(id) =>
-                changeReservationStatus(id, "cancelled")
-              }
-
-              onDelete={removeReservation}
-
-              onView={(reservation) => {
-                setSelectedReservation(reservation);
-                setShowReservationModal(true);
-              }}
-
-              selectedIds={selectedIds}
-              isSelected={isSelected}
-              toggleSelection={toggleSelection}
-              selectAll={selectAll}
-
-              activeIndex={activeIndex}
-
-              setActiveIndex={setActiveIndex}
-
-              sortKey={sortKey}
-              direction={direction}
-              toggleSort={toggleSort}
-
-              onRowContextMenu={openMenu}
-            />
-           )
+                reservations={currentReservations}
+                onConfirm={(id) =>
+                  changeReservationStatus(id, "confirmed")
+                }
+                onCancel={(id) =>
+                  changeReservationStatus(id, "cancelled")
+                }
+                onDelete={removeReservation}
+                onView={(reservation) => {
+                  setSelectedReservation(reservation);
+                  setShowReservationModal(true);
+                }}
+                selectedIds={selectedIds}
+                isSelected={isSelected}
+                toggleSelection={toggleSelection}
+                selectAll={selectAll}
+                activeIndex={activeIndex}
+                setActiveIndex={setActiveIndex}
+                sortKey={sortKey}
+                direction={direction}
+                toggleSort={toggleSort}
+                onRowContextMenu={openMenu}
+              />
+            )}
 
             <DashboardPagination
               currentPage={currentPage}

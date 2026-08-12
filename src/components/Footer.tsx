@@ -159,7 +159,7 @@ export default function Footer() {
             </a>
           </p>
           <div className="flex gap-4 text-xs text-white/40">
-            Powered by modern culinary passion.
+            Powered by Sindhyaar Digital Solutions
           </div>
         </div>
       </div>

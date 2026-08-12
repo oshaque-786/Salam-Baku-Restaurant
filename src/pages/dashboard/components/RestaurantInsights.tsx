@@ -1,32 +1,32 @@
 import { memo } from "react";
 
 import {
-  TrendingUp,
-  TrendingDown,
-  Brain,
-  Flame,
   Activity,
-  Gauge,
-  Target,
-  DollarSign,
+  Brain,
   BrainCircuit,
+  DollarSign,
+  Flame,
+  Gauge,
   ShieldAlert,
-  Users,
   Sparkles,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Users,
 } from "lucide-react";
 
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
   AreaChart,
   Area,
   BarChart,
   Bar,
+  CartesianGrid,
   XAxis,
   YAxis,
   Tooltip,
-  CartesianGrid,
+  LineChart,
+  Line,
   RadialBarChart,
   RadialBar,
   PolarAngleAxis,
@@ -37,3688 +37,2523 @@ interface Props {
   executiveBrain: any;
 }
 
+interface MetricCardProps {
+  label: string;
+  value: string | number;
+  description?: string;
+  icon: React.ReactNode;
+  accent?: string;
+}
+
+function MetricCard({
+  label,
+  value,
+  description,
+  icon,
+  accent = "text-cyan-400",
+}: MetricCardProps) {
+  return (
+    <div className="rounded-xl border border-white/10 bg-slate-800 p-4 transition-colors duration-200 hover:border-white/20 sm:p-5">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <span className="text-sm text-white/50">{label}</span>
+
+        <span className={accent}>{icon}</span>
+      </div>
+
+      <div className="text-2xl font-bold text-white sm:text-3xl">
+        {value}
+      </div>
+
+      {description && (
+        <div className={`mt-2 text-xs ${accent}`}>
+          {description}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RestaurantInsights({
   insights,
   executiveBrain,
 }: Props) {
+  /*
+   * ------------------------------------------------------------
+   * SAFE DATA NORMALIZATION
+   * ------------------------------------------------------------
+   *
+   * The dashboard should remain stable even if one optional
+   * intelligence value is temporarily unavailable.
+   */
 
-const healthScore =
-  Math.min(
+  const forecastNextWeek = Array.isArray(
+    insights?.forecastNextWeek
+  )
+    ? insights.forecastNextWeek
+    : [];
+
+  const last7Days = Array.isArray(insights?.last7Days)
+    ? insights.last7Days
+    : [];
+
+  const actionTimeline = Array.isArray(
+    insights?.actionTimeline
+  )
+    ? insights.actionTimeline
+    : [];
+
+  const executiveInsights = Array.isArray(
+    executiveBrain?.insights
+  )
+    ? executiveBrain.insights
+    : [];
+
+  const executiveRisks = Array.isArray(
+    executiveBrain?.risks
+  )
+    ? executiveBrain.risks
+    : [];
+
+  const executiveOpportunities = Array.isArray(
+    executiveBrain?.opportunities
+  )
+    ? executiveBrain.opportunities
+    : [];
+
+  const executiveActions = Array.isArray(
+    executiveBrain?.executiveActions
+  )
+    ? executiveBrain.executiveActions
+    : [];
+
+  const executiveWarnings = Array.isArray(
+    executiveBrain?.executiveWarnings
+  )
+    ? executiveBrain.executiveWarnings
+    : [];
+
+  /*
+   * ------------------------------------------------------------
+   * DERIVED VALUES
+   * ------------------------------------------------------------
+   */
+
+  const weeklyGrowth = Number(
+    insights?.weeklyGrowth ?? 0
+  );
+
+  const cancellationRate = Number(
+    insights?.cancellationRate ?? 0
+  );
+
+  const utilizationRate = Number(
+    insights?.utilizationRate ?? 0
+  );
+
+  const confirmationRate = Number(
+    insights?.confirmationRate ?? 0
+  );
+
+  const healthScore = Math.min(
     100,
     Math.max(
       0,
-      70 +
-      insights.weeklyGrowth -
-      insights.cancellationRate
+      Math.round(
+        70 +
+          weeklyGrowth -
+          cancellationRate
+      )
     )
   );
 
-const revenueProjection =
-  insights.forecastNextWeek.map(
-    (day) => ({
-      day: day.day,
+  const expectedRevenue = Number(
+    insights?.expectedRevenue ?? 0
+  );
+
+  const recommendedStaff = Number(
+    insights?.recommendedStaff ?? 0
+  );
+
+  const aiConfidence = Number(
+    insights?.aiConfidence ??
+      executiveBrain?.revenueConfidence ??
+      0
+  );
+
+  /*
+   * Revenue projection used by the chart.
+   *
+   * Existing forecast values represent reservation demand.
+   * The multiplier is retained from the previous implementation
+   * so the dashboard does not unexpectedly change its business
+   * model during this UI refactor.
+   */
+
+  const revenueProjection = forecastNextWeek.map(
+    (day: any) => ({
+      day: day?.day ?? "",
       revenue:
-        day.predicted * 45,
+        Number(day?.predicted ?? 0) * 45,
     })
   );
 
-const staffProjection =
-  insights.forecastNextWeek.map(
-    (day) => ({
-      day: day.day,
-      staff:
-        Math.max(
-          2,
-          Math.ceil(
-            day.predicted / 25
-          )
-        ),
+  /*
+   * Staff projection.
+   *
+   * Keeps the previous business rule while moving the logic
+   * into one controlled location.
+   */
+
+  const staffProjection = forecastNextWeek.map(
+    (day: any) => ({
+      day: day?.day ?? "",
+      staff: Math.max(
+        2,
+        Math.ceil(
+          Number(day?.predicted ?? 0) / 25
+        )
+      ),
     })
   );
 
-const occupancyData = [
-  {
-    name: "Occupancy",
-    value:
-      insights.utilizationRate,
-  },
-];
+  /*
+   * ------------------------------------------------------------
+   * EXECUTIVE DECISION
+   * ------------------------------------------------------------
+   */
+
+  const executiveDecision =
+    insights?.executiveDecision ?? {
+      priority:
+        insights?.executivePriority ??
+        executiveBrain?.executivePriority ??
+        "Monitor",
+      action:
+        insights?.promotionRecommendation ??
+        "Continue monitoring restaurant performance.",
+      confidence: aiConfidence,
+      impact: "Moderate",
+      status: "Monitoring",
+      color: "cyan",
+    };
+
+  const decisionColor =
+    executiveDecision?.color ?? "cyan";
+
+  const decisionColorClasses =
+    decisionColor === "red"
+      ? {
+          badge:
+            "bg-red-500/20 text-red-400",
+          dot: "bg-red-400",
+        }
+      : decisionColor === "orange"
+      ? {
+          badge:
+            "bg-orange-500/20 text-orange-400",
+          dot: "bg-orange-400",
+        }
+      : decisionColor === "emerald"
+      ? {
+          badge:
+            "bg-emerald-500/20 text-emerald-400",
+          dot: "bg-emerald-400",
+        }
+      : {
+          badge:
+            "bg-cyan-500/20 text-cyan-400",
+          dot: "bg-cyan-400",
+        };
+
+  /*
+   * ------------------------------------------------------------
+   * COMPONENT
+   * ------------------------------------------------------------
+   */
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-slate-900 p-6">
+    <div className="rounded-2xl border border-white/10 bg-slate-900 p-4 text-white sm:p-6">
 
-      <div className="mb-6 flex items-center gap-2">
-        <Brain className="h-5 w-5 text-cyan-400" />
+      {/* ======================================================
+          EXECUTIVE OVERVIEW
+      ====================================================== */}
 
-        <h2 className="text-lg font-semibold text-white">
-          Restaurant Intelligence
-        </h2>
-      </div>
+      <section>
+        <div className="mb-6 flex items-center gap-3">
+          <Brain className="h-6 w-6 text-cyan-400" />
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <h2 className="text-xl font-semibold text-white">
+              Restaurant Intelligence
+            </h2>
 
-        {/* Weekly Growth */}
-
-        <div className="rounded-xl border border-white/10 bg-slate-800 p-4 sm:p-5">
-
-          <div className="mb-2 text-sm text-white/50">
-            Weekly Growth
+            <p className="mt-1 text-sm text-white/40">
+              Executive-level restaurant performance overview
+            </p>
           </div>
-
-          <div className="flex items-center gap-3">
-
-            {insights.trendDirection === "up" ? (
-
-              <TrendingUp className="h-7 w-7 text-green-400" />
-
-            ) : (
-
-              <TrendingDown className="h-7 w-7 text-red-400" />
-
-            )}
-
-            <div>
-
-              <div className="text-xl font-bold text-white sm:text-2xl">
-                {insights.weeklyGrowth}%
-              </div>
-
-              <div className="text-sm text-cyan-400">
-                {insights.growthLabel}
-              </div>
-
-            </div>
-
-          </div>
-
         </div>
 
-        {/* Busiest Day */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
 
-        <div className="rounded-xl border border-white/10 bg-slate-800 p-5">
+          <MetricCard
+            label="Weekly Growth"
+            value={`${weeklyGrowth}%`}
+            description={
+              insights?.growthLabel ??
+              "Compared with previous period"
+            }
+            icon={
+              insights?.trendDirection === "up" ? (
+                <TrendingUp className="h-6 w-6" />
+              ) : (
+                <TrendingDown className="h-6 w-6" />
+              )
+            }
+            accent={
+              insights?.trendDirection === "up"
+                ? "text-emerald-400"
+                : "text-red-400"
+            }
+          />
 
-          <div className="mb-2 text-sm text-white/50">
-            Busiest Day
-          </div>
+          <MetricCard
+            label="Busiest Day"
+            value={
+              insights?.busiestWeekDay?.day ??
+              insights?.peakReservationDay?.day ??
+              "N/A"
+            }
+            description={
+              insights?.busiestWeekDay?.count != null
+                ? `${insights.busiestWeekDay.count} reservations`
+                : "Reservation demand"
+            }
+            icon={
+              <Flame className="h-6 w-6" />
+            }
+            accent="text-orange-400"
+          />
 
-          <div className="flex items-center gap-3">
+          <MetricCard
+            label="Health Score"
+            value={`${healthScore}/100`}
+            description="Overall restaurant performance"
+            icon={
+              <Target className="h-6 w-6" />
+            }
+            accent="text-emerald-400"
+          />
 
-            <Flame className="h-7 w-7 text-orange-400" />
-
-            <div>
-
-              <div className="text-xl font-bold text-white">
-                {insights.busiestWeekDay.day}
-              </div>
-
-              <div className="text-sm text-orange-400">
-                {insights.busiestWeekDay.count} reservations
-              </div>
-
-            </div>
-
-          </div>
+          <MetricCard
+            label="AI Confidence"
+            value={`${aiConfidence}%`}
+            description="Current intelligence confidence"
+            icon={
+              <BrainCircuit className="h-6 w-6" />
+            }
+            accent="text-violet-400"
+          />
 
         </div>
+      </section>
 
-        {/* AI Recommendation */}
+      {/* ======================================================
+          AI RECOMMENDATION
+      ====================================================== */}
 
-        <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
+      <section className="mt-6 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5 sm:p-6">
 
-          <div className="mb-2 text-sm text-cyan-300">
+        <div className="mb-3 flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-cyan-400" />
+
+          <h3 className="font-semibold text-cyan-300">
             AI Recommendation
-          </div>
-
-          <div className="text-sm leading-6 text-white/80">
-            {insights.weeklyRecommendation}
-          </div>
-
-        </div>
-
-        <div className="rounded-xl border border-white/10 bg-slate-800 p-5">
-
-          <div className="mb-2 flex items-center gap-2">
-
-            <Target className="h-5 w-5 text-green-400" />
-
-            <span className="text-sm text-white/50">
-              Health Score
-            </span>
-
-          </div>
-
-          <div className="text-4xl font-bold text-white">
-
-            {healthScore}
-
-          </div>
-
-          <div className="mt-2 text-sm text-green-400">
-
-            Overall Restaurant Performance
-
-          </div>
-
-        </div>
-
-      </div>
-
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
-
-          <div className="mb-5 flex items-center gap-2">
-
-            <Activity className="h-5 w-5 text-cyan-400" />
-
-            <h3 className="font-semibold text-white">
-
-              Weekly Reservation Trend
-
-            </h3>
-
-          </div>
-
-          <div className="h-72">
-
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-
-              <LineChart
-                data={insights.last7Days}
-              >
-
-                <CartesianGrid
-                  stroke="#334155"
-                />
-
-                <XAxis
-                  dataKey="day"
-                  stroke="#94a3b8"
-                />
-
-                <YAxis
-                  stroke="#94a3b8"
-                />
-
-                <Tooltip />
-
-                <Line
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#06b6d4"
-                  strokeWidth={3}
-                  dot={{ r: 5 }}
-                />
-
-              </LineChart>
-
-            </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-
-          {/* Revenue Forecast */}
-
-          <div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-            <div className="mb-3 flex items-center gap-2">
-
-              <DollarSign className="h-5 w-5 text-green-400" />
-
-              <span className="text-sm text-white/50">
-                Expected Revenue
-              </span>
-
-            </div>
-
-            <div className="text-3xl font-bold text-white">
-
-              $
-              {insights.expectedRevenue.toLocaleString()}
-
-            </div>
-
-            <div className="mt-2 text-xs text-green-400">
-
-              Next 7 days prediction
-
-            </div>
-
-          </div>
-
-          {/* Staff */}
-
-          <div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-            <div className="mb-3 flex items-center gap-2">
-
-              <Users className="h-5 w-5 text-cyan-400" />
-
-              <span className="text-sm text-white/50">
-
-                Recommended Staff
-
-              </span>
-
-            </div>
-
-            <div className="text-3xl font-bold text-white">
-
-              {insights.recommendedStaff}
-
-            </div>
-
-            <div className="mt-2 text-xs text-cyan-400">
-
-              Employees required
-
-            </div>
-
-          </div>
-
-          {/* AI Forecast */}
-
-          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-6">
-
-            <div className="mb-3 flex items-center gap-2">
-
-              <Sparkles className="h-5 w-5 text-cyan-400" />
-
-              <span className="text-sm text-cyan-300">
-
-                AI Forecast
-
-              </span>
-
-            </div>
-
-            <div className="text-sm leading-6 text-white/80">
-
-              {insights.forecastMessage}
-
-            </div>
-
-          </div>
-
-        </div>
-
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
-
-          <h3 className="mb-5 text-lg font-semibold text-white">
-
-            Next 7 Days Forecast
-
           </h3>
+        </div>
 
-          <div className="space-y-3">
+        <p className="text-sm leading-6 text-white/80 sm:text-base">
+          {insights?.weeklyRecommendation ??
+            executiveBrain?.executiveInsight ??
+            "No recommendation is currently available."}
+        </p>
 
-            {insights.forecastNextWeek.map((day) => (
+      </section>
 
-              <div
+      {/* ======================================================
+          CORE OPERATIONAL KPIs
+      ====================================================== */}
 
-                key={day.day}
+      <section className="mt-8">
 
-                className="flex items-center justify-between rounded-lg bg-slate-900 px-4 py-3"
+        <div className="mb-5 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-cyan-400" />
 
-              >
+          <h3 className="text-lg font-semibold text-white">
+            Operational KPIs
+          </h3>
+        </div>
 
-                <span className="text-white">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 
-                  {day.day}
+          <MetricCard
+            label="Capacity Utilization"
+            value={`${utilizationRate}%`}
+            description="Current occupancy"
+            icon={
+              <Gauge className="h-6 w-6" />
+            }
+            accent="text-cyan-400"
+          />
 
-                </span>
+          <MetricCard
+            label="Confirmation Rate"
+            value={`${confirmationRate}%`}
+            description="Reservation confirmations"
+            icon={
+              <Target className="h-6 w-6" />
+            }
+            accent="text-emerald-400"
+          />
 
-                <span className="font-semibold text-cyan-400">
+          <MetricCard
+            label="Cancellation Rate"
+            value={`${cancellationRate}%`}
+            description="Current cancellation level"
+            icon={
+              <ShieldAlert className="h-6 w-6" />
+            }
+            accent="text-red-400"
+          />
 
-                  {day.predicted} Reservations
-
-                </span>
-
-              </div>
-
-            ))}
-
-          </div>
+          <MetricCard
+            label="Recommended Staff"
+            value={recommendedStaff}
+            description="Employees required"
+            icon={
+              <Users className="h-6 w-6" />
+            }
+            accent="text-orange-400"
+          />
 
         </div>
 
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
+      </section>
 
-          <div className="mb-6 flex items-center gap-3">
+      {/* ======================================================
+          WEEKLY RESERVATION TREND
+      ====================================================== */}
 
-            <Activity className="h-6 w-6 text-cyan-400" />
+      <section className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-4 sm:p-6">
 
-            <h3 className="text-xl font-semibold text-white">
+        <div className="mb-5 flex items-center gap-2">
+          <Activity className="h-5 w-5 text-cyan-400" />
 
-              Executive Analytics
+          <h3 className="font-semibold text-white">
+            Weekly Reservation Trend
+          </h3>
+        </div>
 
-            </h3>
+        <div className="h-72 w-full">
 
-          </div>
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+          >
+            <LineChart data={last7Days}>
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              <CartesianGrid
+                stroke="#334155"
+                strokeDasharray="3 3"
+              />
 
-            {/* Capacity */}
+              <XAxis
+                dataKey="day"
+                stroke="#94a3b8"
+              />
 
-            <div className="rounded-lg bg-slate-900 p-5">
+              <YAxis
+                stroke="#94a3b8"
+                allowDecimals={false}
+              />
 
-              <div className="text-sm text-white/50">
+              <Tooltip />
 
-                Capacity Utilization
+              <Line
+                type="monotone"
+                dataKey="count"
+                stroke="#06b6d4"
+                strokeWidth={3}
+                dot={{ r: 4 }}
+                activeDot={{ r: 6 }}
+              />
 
-              </div>
-
-              <div className="mt-2 text-4xl font-bold text-cyan-400">
-
-                {insights.utilizationRate}%
-
-              </div>
-
-            </div>
-
-            {/* Confirmation */}
-
-            <div className="rounded-lg bg-slate-900 p-5">
-
-              <div className="text-sm text-white/50">
-
-                Confirmation Rate
-
-              </div>
-
-              <div className="mt-2 text-4xl font-bold text-green-400">
-
-                {insights.confirmationRate}%
-
-              </div>
-
-            </div>
-
-            {/* Cancellation */}
-
-            <div className="rounded-lg bg-slate-900 p-5">
-
-              <div className="text-sm text-white/50">
-
-                Cancellation Rate
-
-              </div>
-
-              <div className="mt-2 text-4xl font-bold text-red-400">
-
-                {insights.cancellationRate}%
-
-              </div>
-
-            </div>
-
-          </div>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-          {/* Peak */}
-
-          <div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-            <div className="mb-4 text-lg font-semibold text-white">
-
-              Peak Reservation Day
-
-            </div>
-
-            <div className="text-3xl font-bold text-orange-400">
-
-              {insights.peakReservationDay.day}
-
-            </div>
-
-            <div className="mt-2 text-sm text-white/50">
-
-              {insights.peakReservationDay.count} reservations
-
-            </div>
-
-          </div>
-
-          {/* Weakest */}
-
-          <div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-            <div className="mb-4 text-lg font-semibold text-white">
-
-              Lowest Reservation Day
-
-            </div>
-
-            <div className="text-3xl font-bold text-red-400">
-
-              {insights.weakestReservationDay.day}
-
-            </div>
-
-            <div className="mt-2 text-sm text-white/50">
-
-              {insights.weakestReservationDay.count} reservations
-
-            </div>
-
-          </div>
+            </LineChart>
+          </ResponsiveContainer>
 
         </div>
 
-        <div className="mt-8 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-6">
+      </section>
+
+      {/* ======================================================
+          FORECAST SUMMARY
+      ====================================================== */}
+
+      <section className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+
+        <MetricCard
+          label="Expected Revenue"
+          value={`$${expectedRevenue.toLocaleString()}`}
+          description="Next 7 days prediction"
+          icon={
+            <DollarSign className="h-6 w-6" />
+          }
+          accent="text-emerald-400"
+        />
+
+        <MetricCard
+          label="Recommended Staff"
+          value={recommendedStaff}
+          description="Expected staffing requirement"
+          icon={
+            <Users className="h-6 w-6" />
+          }
+          accent="text-cyan-400"
+        />
+
+        <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 sm:p-5">
 
           <div className="mb-3 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-cyan-400" />
 
-            <Brain className="h-6 w-6 text-cyan-400" />
-
-            <span className="text-lg font-semibold text-cyan-300">
-
-              Executive AI Recommendation
-
+            <span className="text-sm text-cyan-300">
+              AI Forecast
             </span>
-
           </div>
 
-          <p className="leading-7 text-white/80">
-
-            {insights.executiveInsight}
-
+          <p className="text-sm leading-6 text-white/80">
+            {insights?.forecastMessage ??
+              "Forecast information is currently unavailable."}
           </p>
 
         </div>
 
-{/* ==========================================
-EXECUTIVE DECISION CENTER
-========================================== */}
+      </section>
 
-<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900 to-slate-800 p-6">
+      {/* ======================================================
+          NEXT 7 DAYS RESERVATION FORECAST
+      ====================================================== */}
 
-  <div className="mb-5 flex items-center gap-3">
+      <section className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-4 sm:p-6">
 
-    <BrainCircuit className="h-7 w-7 text-cyan-400" />
+        <div className="mb-5 flex items-center justify-between gap-3">
 
-    <div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">
+              Next 7 Days Forecast
+            </h3>
 
-      <h2 className="text-xl font-semibold text-white">
-        Executive Decision Center
-      </h2>
+            <p className="mt-1 text-sm text-white/40">
+              Predicted reservation demand
+            </p>
+          </div>
 
-      <p className="text-sm text-white/40">
-        AI-generated operational recommendation
-      </p>
-
-    </div>
-
-  </div>
-
-  <div className="grid gap-5 md:grid-cols-4">
-
-    <div>
-
-      <div className="text-xs uppercase text-white/40">
-        Priority
-      </div>
-
-      <div className="mt-2 text-lg font-bold text-cyan-300">
-        <span
-        className={`
-        inline-flex
-        rounded-full
-        px-3
-        py-1
-        text-sm
-        font-bold
-
-        ${
-        insights.executiveDecision.color==="red"
-
-        ?"bg-red-500/20 text-red-400"
-
-        :insights.executiveDecision.color==="orange"
-
-        ?"bg-orange-500/20 text-orange-400"
-
-        :insights.executiveDecision.color==="emerald"
-
-        ?"bg-emerald-500/20 text-emerald-400"
-
-        :"bg-cyan-500/20 text-cyan-400"
-        }
-        `}
-        >
-
-        {insights.executiveDecision.priority}
-
-        </span>
-      </div>
-
-    </div>
-
-    <div>
-
-      <div className="text-xs uppercase text-white/40">
-        Recommended Action
+          <Gauge className="h-5 w-5 text-cyan-400" />
 
         </div>
 
-      </div>
+        <div className="space-y-3">
 
-      <div className="mt-2 font-semibold text-white">
-        {insights.executiveDecision.action}
-      </div>
-      
-      <div className="mt-2 flex items-center gap-2">
+          {forecastNextWeek.length === 0 ? (
 
-      <div
-      className={`
-      h-2
-      w-2
-      rounded-full
-      animate-pulse
+            <div className="rounded-lg bg-slate-900 p-4 text-sm text-white/50">
+              Forecast data is currently unavailable.
+            </div>
 
-      ${
-      insights.executiveDecision.color==="red"
+          ) : (
 
-      ?"bg-red-400"
+            forecastNextWeek.map(
+              (day: any, index: number) => (
 
-      :insights.executiveDecision.color==="orange"
+                <div
+                  key={`${day?.day ?? "day"}-${index}`}
+                  className="flex items-center justify-between gap-4 rounded-lg bg-slate-900 px-4 py-3"
+                >
 
-      ?"bg-orange-400"
+                  <span className="text-sm text-white sm:text-base">
+                    {day?.day ?? "N/A"}
+                  </span>
 
-      :insights.executiveDecision.color==="emerald"
+                  <span className="font-semibold text-cyan-400">
+                    {Number(
+                      day?.predicted ?? 0
+                    )} Reservations
+                  </span>
 
-      ?"bg-emerald-400"
+                </div>
 
-      :"bg-cyan-400"
-      }
-      `}
-      />
+              )
+            )
 
-      <span className="text-xs text-white/40">
+          )}
 
-      {insights.executiveDecision.status}
+        </div>
 
-      </span>
+      </section>
 
-      </div>
+      {/* ======================================================
+          EXECUTIVE DECISION CENTER
+      ====================================================== */}
 
-    </div>
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-slate-900 to-slate-800 p-5 sm:p-6">
 
-    <div>
+        <div className="mb-6 flex items-start gap-3 sm:items-center">
 
-      <div className="text-xs uppercase text-white/40">
-        Confidence
-      </div>
+          <BrainCircuit className="h-7 w-7 text-cyan-400" />
 
-      <div className="mt-2 text-lg font-bold text-emerald-400">
-        {insights.executiveDecision.confidence}%
-      </div>
-      <div className="mt-3 h-2 rounded-full bg-white/10">
+          <div>
+            <h2 className="text-xl font-semibold text-white">
+              Executive Decision Center
+            </h2>
 
-      <div
-
-      className="h-2 rounded-full bg-emerald-400 transition-all duration-700"
-
-      style={{
-
-      width:`${insights.executiveDecision.confidence}%`
-
-      }}
-
-       />
-
-      </div>
-
-    </div>
-
-    <div>
-
-      <div className="text-xs uppercase text-white/40">
-        Expected Impact
-      </div>
-
-      <div className="mt-2 text-lg font-bold text-orange-400">
-        {insights.executiveDecision.impact}
-      </div>
-
-      <div className="mt-2 flex items-center gap-2">
-
-        <Sparkles className="h-4 w-4 text-yellow-400"/>
-
-        <span className="text-xs text-white/40">
-
-          AI Optimized
-
-        </span>
-
-       </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-{/* ==========================================
-AI ACTION PLANNER
-========================================== */}
-
-<div className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-4 md:p-6">
-
-  <div className="mb-5 flex items-start gap-3 md:items-center">
-
-    <Activity className="h-6 w-6 text-cyan-400" />
-
-    <div>
-
-      <h2 className="text-lg md:text-xl font-semibold text-white">
-        AI Action Planner
-      </h2>
-
-      <p className="text-sm text-white/40">
-        Today's recommended operational timeline
-      </p>
-
-    </div>
-
-  </div>
-
-  <div className="space-y-4">
-
-    {insights.actionTimeline.map((item, index) => (
-
-      <div
-        key={index}
-        className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between rounded-lg border border-white/10 bg-slate-900 px-4 py-3"
-      >
-
-        <div>
-
-          <div className="text-sm text-cyan-400">
-            {item.time}
-          </div>
-
-          <div className="font-medium text-white">
-            {item.title}
+            <p className="mt-1 text-sm text-white/40">
+              AI-generated operational recommendation
+            </p>
           </div>
 
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-          <input
-            type="checkbox"
-            checked={item.status === "completed"}
-            readOnly
-            className="h-4 w-4 accent-cyan-400"
-          />
+          {/* Priority */}
 
-          <span
-            className={`
-              rounded-full
-              px-3
-              py-1
-              text-xs
-              font-semibold
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Priority
+            </div>
 
-              ${
-                item.status === "completed"
-                  ? "bg-emerald-500/20 text-emerald-400"
-                  : item.status === "active"
-                  ? "bg-cyan-500/20 text-cyan-400"
-                  : "bg-white/10 text-white/50"
-              }
-            `}
-          >
-            {item.status}
-          </span>
+            <div className="mt-2">
 
-         </div>
-
-        </div>
-
-       ))}
-
-  </div>
-
-</div>
-
-{/* ==========================================
-WORKFLOW PROGRESS
-========================================== */}
-
-<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-6">
-
-<div className="flex items-center justify-between">
-
-<div>
-
-<h2 className="text-lg font-semibold text-white">
-
-Manager Workflow
-
-</h2>
-
-<p className="text-sm text-white/40">
-
-Today's completion status
-
-</p>
-
-</div>
-
-<div className="text-right">
-
-<div className="text-3xl font-bold text-cyan-300">
-
-{insights.workflowProgress}%
-
-</div>
-
-<div className="text-xs text-white/40">
-
-Completed
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-5 h-3 rounded-full bg-white/10">
-
-<div
-
-className="h-3 rounded-full bg-cyan-400 transition-all duration-700"
-
-style={{
-
-width:`${insights.workflowProgress}%`
-
-}}
-
- />
-
-</div>
-
-<div className="mt-5 flex justify-between">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Tasks
-
-</div>
-
-<div className="font-semibold text-white">
-
-{insights.completedTasks} / {insights.totalTasks}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Manager Productivity
-
-</div>
-
-<div className="font-semibold text-emerald-400">
-
-{Math.round(insights.managerProductivity)}%
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-{/* ==========================================
-EXECUTIVE AI BRAIN
-========================================== */}
-
-<div className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-4 md:p-6">
-
-  <h2 className="mb-6 text-lg md:text-xl font-semibold text-cyan-300">
-    Executive AI Brain
-  </h2>
-
-  {/* Health Score */}
-
-  <div className="mb-6">
-
-    <div className="text-xs md:text-sm text-white/40">
-      Restaurant Health
-    </div>
-
-    <div className="mt-2 text-3xl md:text-4xl font-bold text-cyan-300">
-      {executiveBrain.healthScore}%
-    </div>
-
-  </div>
-
-  {/* Executive Priority */}
-
-  <div className="mb-8 rounded-xl border border-cyan-500/20 bg-slate-800 p-4 md:p-5">
-
-    <div className="text-sm text-white/40">
-      Executive Priority
-    </div>
-
-    <div className="mt-2 text-xl md:text-2xl font-bold text-orange-400">
-      {executiveBrain.executivePriority}
-    </div>
-
-  </div>
-
-  {/* Insights / Risks / Opportunities */}
-
-  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-
-    <div>
-
-      <div className="mb-3 font-semibold text-emerald-400">
-        Insights
-      </div>
-
-      {executiveBrain.insights.map(
-        (item: string, index: number) => (
-          <div
-            key={index}
-            className="mb-2 text-xs md:text-sm text-white"
-          >
-            • {item}
-          </div>
-        )
-      )}
-
-    </div>
-
-    <div>
-
-      <div className="mb-3 font-semibold text-red-400">
-        Risks
-      </div>
-
-      {executiveBrain.risks.map(
-        (item: string, index: number) => (
-          <div
-            key={index}
-            className="mb-2 text-xs md:text-sm text-white"
-          >
-            • {item}
-          </div>
-        )
-      )}
-
-    </div>
-
-    <div>
-
-      <div className="mb-3 font-semibold text-cyan-400">
-        Opportunities
-      </div>
-
-      {executiveBrain.opportunities.map(
-        (item: string, index: number) => (
-          <div
-            key={index}
-            className="mb-2 text-xs md:text-sm text-white"
-          >
-            • {item}
-          </div>
-        )
-      )}
-
-    </div>
-
-  </div>
-
-  {/* Executive Actions / Warnings */}
-
-  <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-2">
-
-    <div>
-
-      <div className="mb-3 font-semibold text-cyan-300">
-        Executive Actions
-      </div>
-
-      {executiveBrain.executiveActions.map(
-        (item: string, index: number) => (
-          <div
-            key={index}
-            className="mb-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200"
-          >
-            ✓ {item}
-          </div>
-        )
-      )}
-
-    </div>
-
-    <div>
-
-      <div className="mb-3 font-semibold text-red-400">
-        Executive Warnings
-      </div>
-
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
-
-<h3 className="mb-3 text-base md:text-lg font-semibold text-emerald-300">
-
-Revenue Strategy
-
-</h3>
-
-{executiveBrain.revenueStrategy.map(
-
-(item:string,index:number)=>(
-
-<div key={index}
-
-className="mb-2 text-xs md:text-sm text-white">
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 md:p-5">
-
-<h3 className="mb-4 font-semibold text-cyan-300">
-
-Marketing Strategy
-
-</h3>
-
-{executiveBrain.marketingStrategy.map(
-
-(item:string,index:number)=>(
-
-<div key={index}
-
-className="mb-2 text-sm text-white">
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-6 grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<h3 className="mb-3 font-semibold text-orange-300">
-
-Staff Strategy
-
-</h3>
-
-{executiveBrain.staffingStrategy.map(
-
-(item:string,index:number)=>(
-
-<div key={index}
-
-className="mb-2 text-sm text-white">
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div>
-
-<h3 className="mb-3 font-semibold text-pink-300">
-
-Customer Strategy
-
-</h3>
-
-{executiveBrain.customerStrategy.map(
-
-(item:string,index:number)=>(
-
-<div key={index}
-
-className="mb-2 text-sm text-white">
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div>
-
-<h3 className="mb-3 font-semibold text-cyan-300">
-
-Growth Strategy
-
-</h3>
-
-{executiveBrain.growthStrategy.map(
-
-(item:string,index:number)=>(
-
-<div key={index}
-
-className="mb-2 text-sm text-white">
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-yellow-300">
-
-CEO Weekly AI Report
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-AI Summary
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.ceoSummary}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-CEO Decision
-
-</div>
-
-<div className="mt-2 text-cyan-300">
-
-{executiveBrain.ceoDecision}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-4 md:p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-purple-300">
-
-AI Autonomous Optimization
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-2">
-
-<div>
-
-<h3 className="mb-4 font-semibold text-cyan-300">
-
-Optimization Tasks
-
-</h3>
-
-{executiveBrain.optimizationTasks.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-sm text-cyan-200"
->
-
-⚙ {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div>
-
-<div className="mt-10 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-indigo-300">
-
-Restaurant Digital Twin
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<h3 className="mb-3 font-semibold text-cyan-300">
-
-Future Simulation
-
-</h3>
-
-{executiveBrain.simulations.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 text-sm text-white"
->
-
-🔮 {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div>
-
-<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-emerald-300">
-
-Business Intelligence Scorecard
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-5">
-
-<div>
-
-<div className="text-sm text-white/40">
-Profitability
-</div>
-
-<div className="mt-2 text-2xl md:text-3xl font-bold text-emerald-400">
-{executiveBrain.profitabilityScore}%
-</div>
-
-</div>
-
-<div>
-
-<div className="mt-10 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-yellow-300">
-
-Executive KPI Benchmark
-
-</h2>
-
-<div className="space-y-3">
-
-{executiveBrain.benchmarkResults.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="flex items-center justify-between rounded-lg bg-slate-800 px-4 py-3"
->
-
-<span className="text-white">
-
-{item}
-
-</span>
-
-<span className="rounded-full bg-cyan-500/20 px-3 py-1 text-xs text-cyan-300">
-
-{executiveBrain.benchmarkStatus[index]}
-
-</span>
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-indigo-300">
-
-Multi-Branch Comparison
-
-</h2>
-
-<div className="overflow-x-auto">
-
-<table className="min-w-[720px] w-full text-left">
-
-<thead>
-
-<tr className="border-b border-white/10">
-
-<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
-
-Branch
-
-</th>
-
-<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
-
-Revenue
-
-</th>
-
-<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
-
-Occupancy
-
-</th>
-
-<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
-
-Growth
-
-</th>
-
-<th className="px-2 pb-3 text-xs md:text-sm text-white/50">
-
-Status
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-{executiveBrain.branchComparison.map(
-
-(branch:any,index:number)=>(
-
-<tr
-key={index}
-className="border-b border-white/5"
->
-
-<td className="px-2 py-3 text-xs md:text-sm text-white">
-
-{branch.branch}
-
-</td>
-
-<td className="px-2 py-3 text-xs md:text-sm text-emerald-300">
-
-${branch.revenue}
-
-</td>
-
-<td className="px-2 py-3 text-xs md:text-sm text-cyan-300">
-
-{branch.occupancy}%
-
-</td>
-
-<td className="px-2 py-3 text-xs md:text-sm text-yellow-300">
-
-{branch.growth}%
-
-</td>
-
-<td className="px-2 py-3 text-xs md:text-sm text-pink-300">
-
-{branch.status}
-
-</td>
-
-</tr>
-
-)
-
-)}
-
-</tbody>
-
-</table>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-slate-900 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-emerald-300">
-
-Executive Daily Brief
-
-</h2>
-
-<div className="space-y-5">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Headline
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-300">
-
-{executiveBrain.executiveHeadline}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Summary
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.executiveSummary}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Today's Focus
-
-</div>
-
-<div className="mt-2 font-semibold text-cyan-300">
-
-{executiveBrain.todayFocus}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="mb-2 text-sm text-white/40">
-
-Executive Alerts
-
-</div>
-
-{executiveBrain.executiveAlerts.length===0?
-
-<div className="text-emerald-400">
-
-No critical alerts.
-
-</div>
-
-:
-
-executiveBrain.executiveAlerts.map(
-
-(alert:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-red-300"
->
-
-⚠ {alert}
-
-</div>
-
-)
-
-)
-
-}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-cyan-300">
-
-AI Revenue Forecast
-
-</h2>
-
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-xs md:text-sm text-white/40">
-
-Next Week
-
-</div>
-
-<div className="mt-2 text-2xl md:text-3xl font-bold text-emerald-300">
-
-${executiveBrain.nextWeekRevenue}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Next Month
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-${executiveBrain.nextMonthRevenue}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-yellow-300">
-
-{executiveBrain.revenueConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Trend
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-pink-300">
-
-{executiveBrain.revenueTrend}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-purple-300">
-
-AI Reservation Forecast
-
-</h2>
-
-<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Tomorrow
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.tomorrowReservations}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Next Week
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-emerald-300">
-
-{executiveBrain.nextWeekReservations}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Next Month
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-yellow-300">
-
-{executiveBrain.nextMonthReservations}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Trend
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-pink-300">
-
-{executiveBrain.reservationTrend}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-cyan-300">
-
-{executiveBrain.reservationConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Risk
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-red-300">
-
-{executiveBrain.reservationRisk}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-4 md:p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-orange-300">
-
-AI Occupancy Prediction
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Predicted Occupancy
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-orange-300">
-
-{executiveBrain.predictedOccupancy}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Trend
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-cyan-300">
-
-{executiveBrain.occupancyTrend}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-300">
-
-{executiveBrain.occupancyConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Recommendation
-
-</div>
-
-<div className="mt-2 text-sm text-white">
-
-{executiveBrain.occupancyRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-pink-300">
-
-AI Seasonal Trend
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Current Season
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-pink-300">
-
-{executiveBrain.currentSeason}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Growth
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.seasonalGrowth}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Predicted Revenue
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-emerald-300">
-
-${executiveBrain.seasonalRevenue}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Reservations
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-yellow-300">
-
-{executiveBrain.seasonalReservations}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Occupancy
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-orange-300">
-
-{executiveBrain.seasonalOccupancy}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Recommendation
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.seasonalRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-yellow-300">
-
-AI Event & Holiday Impact
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Event
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-yellow-300">
-
-{executiveBrain.eventName}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Demand
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-orange-300">
-
-{executiveBrain.demandLevel}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Business Boost
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-300">
-
-{executiveBrain.businessBoost}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Revenue
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-cyan-300">
-
-${executiveBrain.holidayRevenue}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8">
-
-<div className="text-sm text-white/40">
-
-Recommendation
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.holidayRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 md:mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 md:p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-indigo-300">
-
-AI Demand Forecast
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-5">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Forecast
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.demandForecast}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Level
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-orange-300">
-
-{executiveBrain.demandLevelAI}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-300">
-
-{executiveBrain.demandConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Profit
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-yellow-300">
-
-${executiveBrain.expectedProfit}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Recommendation
-
-</div>
-
-<div className="mt-2 text-white text-sm">
-
-{executiveBrain.demandRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-red-300">
-
-AI Executive Decision Center
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Priority
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-red-300">
-
-{executiveBrain.executivePriorityLevel}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.executiveDecisionConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Decision
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.executiveDecision}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8">
-
-<div className="mb-3 font-semibold text-orange-300">
-
-Executive Queue
-
-</div>
-
-{executiveBrain.executiveQueue.map(
-
-(item:string,index:number)=>(
-
-<div
-
-key={index}
-
-className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
-
->
-
-• {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-emerald-300">
-
-AI Autonomous Task Generator
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Task Priority
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-orange-300">
-
-{executiveBrain.taskPriority}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Business Impact
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.estimatedBusinessImpact}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Completion Time
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-purple-300">
-
-{executiveBrain.estimatedCompletionHours}h
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8">
-
-<div className="mb-3 font-semibold text-cyan-300">
-
-Generated Tasks
-
-</div>
-
-{executiveBrain.autonomousTasks.map(
-
-(task:string,index:number)=>(
-
-<div
-
-key={index}
-
-className="mb-2 rounded-lg bg-cyan-500/10 px-3 py-2 text-sm text-white"
-
->
-
-✓ {task}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-red-500/20 bg-red-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-red-300">
-
-AI Smart Alert Engine
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Alert Level
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-red-300">
-
-{executiveBrain.alertLevel}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Active Alerts
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-orange-300">
-
-{executiveBrain.alertCount}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Emergency Action
-
-</div>
-
-<div className="mt-2 text-sm text-white">
-
-{executiveBrain.emergencyAction}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8">
-
-<div className="mb-3 font-semibold text-orange-300">
-
-Generated Alerts
-
-</div>
-
-{executiveBrain.smartAlerts.map(
-
-(alert:string,index:number)=>(
-
-<div
-
-key={index}
-
-className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-white"
-
->
-
-⚠ {alert}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-<div className="mt-10 rounded-2xl border border-sky-500/20 bg-sky-500/5 p-6">
-
-  <h2 className="mb-6 text-xl font-semibold text-sky-300">
-
-    Executive Daily Briefing
-
-  </h2>
-
-  <div className="mb-6">
-
-    <div className="text-sm text-white/40">
-
-      Current Briefing
-
-    </div>
-
-    <div className="mt-2 text-3xl font-bold text-sky-300">
-
-      {executiveBrain.briefingPeriod}
-
-    </div>
-
-  </div>
-
-  <div className="space-y-3">
-
-    {executiveBrain.executiveBriefing.map(
-
-      (item:string,index:number)=>(
-
-        <div
-
-          key={index}
-
-          className="rounded-lg bg-sky-500/10 px-4 py-3 text-sm text-white"
-
-        >
-
-          • {item}
-
-        </div>
-
-      )
-
-    )}
-
-  </div>
-
-  <div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-    <div>
-
-      <div className="text-sm text-white/40">
-
-        Tomorrow Focus
-
-      </div>
-
-      <div className="mt-2 text-white">
-
-        {executiveBrain.tomorrowFocus}
-
-      </div>
-
-    </div>
-
-    <div>
-
-      <div className="text-sm text-white/40">
-
-        Daily Summary
-
-      </div>
-
-      <div className="mt-2 text-white">
-
-        {executiveBrain.dailySummary}
-
-      </div>
-
-    </div>
-
-  </div>
-
-</div>
-
-{/* ==========================================
-RESTAURANT CEO DASHBOARD
-========================================== */}
-
-<div className="mt-10 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-violet-300">
-
-Restaurant CEO Dashboard
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-CEO Score
-
-</div>
-
-<div className="mt-2 text-4xl font-bold text-violet-300">
-
-{executiveBrain.ceoScore}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Business Status
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-cyan-300">
-
-{executiveBrain.executiveStatus}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Expected Revenue
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-300">
-
-${executiveBrain.holidayRevenue}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Expected Profit
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-yellow-300">
-
-${executiveBrain.expectedProfit}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Demand
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-orange-300">
-
-{executiveBrain.demandLevelAI}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Alert Level
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-red-300">
-
-{executiveBrain.alertLevel}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Priority
-
-</div>
-
-<div className="mt-2 text-xl font-bold text-cyan-300">
-
-{executiveBrain.executivePriorityLevel}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 rounded-xl bg-violet-500/10 p-4 md:p-5">
-
-<div className="text-sm text-white/40">
-
-CEO Recommendation
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.ceoRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-{/* ==========================================
-AUTONOMOUS RESTAURANT MANAGER
-========================================== */}
-
-<div className="mt-10 rounded-2xl border border-fuchsia-500/20 bg-fuchsia-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-fuchsia-300">
-
-Autonomous Restaurant Manager
-
-</h2>
-
-<div className="grid gap-6 lg:grid-cols-3">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Manager Status
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-emerald-300">
-
-{executiveBrain.autonomousManagerStatus}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Confidence
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{executiveBrain.autonomousConfidence}%
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Decision
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.autonomousDecision}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8">
-
-<div className="mb-3 font-semibold text-cyan-300">
-
-Autonomous Actions
-
-</div>
-
-{executiveBrain.autonomousActions.map(
-
-(action:string,index:number)=>(
-
-<div
-
-key={index}
-
-className="mb-2 rounded-lg bg-fuchsia-500/10 px-3 py-2 text-sm text-white"
-
->
-
-✓ {action}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div className="mt-8 rounded-xl bg-fuchsia-500/10 p-5">
-
-<div className="text-sm text-white/40">
-
-Manager Summary
-
-</div>
-
-<div className="mt-2 text-white">
-
-{executiveBrain.managerSummary}
-
-</div>
-
-</div>
-
-</div>
-
-{/* ==========================================
-CUSTOMER INTELLIGENCE
-========================================== */}
-
-<div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-emerald-300">
-
-Customer Intelligence
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-VIP Customers
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-yellow-300">
-
-{insights.vipCustomers}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Returning
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-300">
-
-{insights.returningCustomers}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-At Risk
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-red-300">
-
-{insights.atRiskCustomers}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Satisfaction
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-emerald-300">
-
-{insights.customerSatisfaction}%
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-{/* ==========================================
-LOYALTY & VIP INSIGHTS
-========================================== */}
-
-<div className="mt-10 rounded-2xl border border-amber-500/20 bg-amber-500/5 p-6">
-
-<h2 className="mb-6 text-xl font-semibold text-amber-300">
-
-Loyalty & VIP Insights
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Loyalty Score
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-amber-300">
-
-{insights.loyaltyScore}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-VIP Status
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-cyan-300">
-
-{insights.vipStatus}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Premium Customers
-
-</div>
-
-<div className="mt-2 text-3xl font-bold text-purple-300">
-
-{insights.premiumCustomers}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Retention Priority
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-red-300">
-
-{insights.retentionPriority}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="text-sm text-white/40">
-Business
-</div>
-
-<div className="mt-2 text-3xl font-bold text-cyan-400">
-{executiveBrain.businessScore}%
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-Customers
-</div>
-
-<div className="mt-2 text-3xl font-bold text-pink-400">
-{executiveBrain.customerHealth}%
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-Operations
-</div>
-
-<div className="mt-2 text-3xl font-bold text-orange-400">
-{executiveBrain.operationalEfficiency}%
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-Revenue
-</div>
-
-<div className="mt-2 text-3xl font-bold text-yellow-400">
-{executiveBrain.revenueStability}%
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<h3 className="mb-3 font-semibold text-red-300">
-
-Future Risks
-
-</h3>
-
-{executiveBrain.simulationRisks.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 text-sm text-red-200"
->
-
-⚠ {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-<div>
-
-<h3 className="mb-3 font-semibold text-emerald-300">
-
-Revenue Forecast
-
-</h3>
-
-{executiveBrain.simulationRevenue.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 text-sm text-emerald-200"
->
-
-💰 {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-</div>
-
-<h3 className="mb-4 font-semibold text-emerald-300">
-
-Expected Benefits
-
-</h3>
-
-{executiveBrain.optimizationBenefits.map(
-
-(item:string,index:number)=>(
-
-<div
-key={index}
-className="mb-2 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200"
->
-
-✓ {item}
-
-</div>
-
-)
-
-)}
-
-</div>
-
-</div>
-
-</div>
-
-<div className="text-sm text-white/40">
-
-Business Outlook
-
-</div>
-
-<div className="mt-2 text-2xl font-bold text-emerald-400">
-
-{executiveBrain.ceoOutlook}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-      {executiveBrain.executiveWarnings.map(
-        (item: string, index: number) => (
-          <div
-            key={index}
-            className="mb-2 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300"
-          >
-            ⚠ {item}
-          </div>
-        )
-      )}
-
-    </div>
-
-  </div>
-
-</div>
-
-{/* ==========================================
-    AI BUSINESS INTELLIGENCE
-========================================== */}
-
-<div className="mt-8">
-
-<h2 className="mb-5 text-xl font-semibold text-cyan-300">
-
-AI Predictive Business Intelligence
-
-</h2>
-
-<div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
-
-<div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
-
-<div className="flex items-center gap-3">
-
-<DollarSign className="h-8 w-8 text-emerald-400"/>
-
-<div>
-
-<div className="text-sm text-white/50">
-
-Predicted Revenue
-
-</div>
-
-<div className="text-2xl font-bold text-white">
-
-${insights.predictedRevenue}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-5">
-
-<div className="flex items-center gap-3">
-
-<Users className="h-8 w-8 text-cyan-400"/>
-
-<div>
-
-<div className="text-sm text-white/50">
-
-Predicted Reservations
-
-</div>
-
-<div className="text-2xl font-bold text-white">
-
-{insights.predictedReservations}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-5">
-
-<div className="flex items-center gap-3">
-
-<ShieldAlert className="h-8 w-8 text-orange-400"/>
-
-<div>
-
-<div className="text-sm text-white/50">
-
-Cancellation Risk
-
-</div>
-
-<div className="text-2xl font-bold text-white">
-
-{insights.cancellationRisk}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-5">
-
-<div className="flex items-center gap-3">
-
-<BrainCircuit className="h-8 w-8 text-violet-400"/>
-
-<div>
-
-<div className="text-sm text-white/50">
-
-AI Confidence
-
-</div>
-
-<div className="text-2xl font-bold text-white">
-
-{insights.aiConfidence}%
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 rounded-xl border border-cyan-500/20 bg-slate-800 p-6">
-
-<h2 className="mb-5 text-xl font-semibold text-cyan-300">
-
-Executive Recommendations
-
-</h2>
-
-<div className="space-y-4">
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Priority
-
-</div>
-
-<div className="font-semibold text-cyan-300">
-
-{insights.executivePriority}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Promotion Strategy
-
-</div>
-
-<div className="font-semibold text-emerald-300">
-
-{insights.promotionRecommendation}
-
-</div>
-
-</div>
-
-<div>
-
-<div className="text-sm text-white/40">
-
-Staff Recommendation
-
-</div>
-
-<div className="font-semibold text-orange-300">
-
-{insights.staffRecommendation}
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-<div className="mt-8 grid gap-6 lg:grid-cols-2">
-
-{/* Revenue Projection */}
-
-<div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-<h2 className="mb-5 text-lg font-semibold text-cyan-300">
-
-Revenue Projection
-
-</h2>
-
-<div className="h-72">
-
-<ResponsiveContainer width="100%" height="100%">
-
-<AreaChart data={insights.forecastNextWeek}>
-
-<CartesianGrid strokeDasharray="3 3" />
-
-<XAxis dataKey="day" />
-
-<YAxis />
-
-<Tooltip />
-
-<Area
-
-type="monotone"
-
-dataKey="predicted"
-
-stroke="#10b981"
-
-fill="#10b98144"
-
-/>
-
-</AreaChart>
-
-</ResponsiveContainer>
-
-</div>
-
-</div>
-
-{/* Occupancy Forecast */}
-
-<div className="rounded-xl border border-white/10 bg-slate-800 p-6">
-
-<h2 className="mb-5 text-lg font-semibold text-cyan-300">
-
-Occupancy Forecast
-
-</h2>
-
-<div className="h-72">
-
-<ResponsiveContainer width="100%" height="100%">
-
-<BarChart data={insights.forecastNextWeek}>
-
-<CartesianGrid strokeDasharray="3 3" />
-
-<XAxis dataKey="day" />
-
-<YAxis />
-
-<Tooltip />
-
-<Bar
-
-dataKey="predicted"
-
-radius={[8,8,0,0]}
-
-/>
-
-</BarChart>
-
-</ResponsiveContainer>
-
-</div>
-
-</div>
-
-</div>
-
-{/* ==========================================
-KPI GAUGES
-========================================== */}
-
-<div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-
-{/* Restaurant Health */}
-
-<div className="rounded-xl border border-emerald-500/20 bg-slate-800 p-4 md:p-5">
-
-<div className="mb-4 flex items-center gap-2">
-
-<Activity className="h-5 w-5 text-emerald-400"/>
-
-<span className="text-white">
-
-Restaurant Health
-
-</span>
-
-</div>
-
-<div className="flex justify-center">
-
-<ResponsiveContainer width={160} height={160}>
-
-<RadialBarChart
-
-cx="50%"
-
-cy="50%"
-
-innerRadius="70%"
-
-outerRadius="100%"
-
-barSize={14}
-
-data={[
-
-{
-
-value: insights.restaurantHealth,
-
-fill:"#10b981",
-
-},
-
-]}
-
->
-
-<PolarAngleAxis
-
-type="number"
-
-domain={[0,100]}
-
-angleAxisId={0}
-
-tick={false}
-
-/>
-
-<RadialBar
-
-dataKey="value"
-
-cornerRadius={12}
-
-/>
-
-</RadialBarChart>
-
-</ResponsiveContainer>
-
-</div>
-
-<div className="text-center text-2xl font-bold text-white">
-
-{insights.restaurantHealth}%
-
-</div>
-
-</div>
-
-{/* AI Confidence */}
-
-<div className="rounded-xl border border-violet-500/20 bg-slate-800 p-4 md:p-5">
-
-<div className="mb-4 flex items-center gap-2">
-
-<BrainCircuit className="h-5 w-5 text-violet-400"/>
-
-<span className="text-white">
-
-AI Confidence
-
-</span>
-
-</div>
-
-<div className="flex justify-center">
-
-<ResponsiveContainer width={160} height={160}>
-
-<RadialBarChart
-
-cx="50%"
-
-cy="50%"
-
-innerRadius="70%"
-
-outerRadius="100%"
-
-barSize={14}
-
-data={[
-
-{
-
-value: insights.aiConfidence,
-
-fill:"#8b5cf6",
-
-},
-
-]}
-
->
-
-<PolarAngleAxis
-
-type="number"
-
-domain={[0,100]}
-
-tick={false}
-
-/>
-
-<RadialBar
-
-dataKey="value"
-
-cornerRadius={12}
-
-/>
-
-</RadialBarChart>
-
-</ResponsiveContainer>
-
-</div>
-
-<div className="text-center text-2xl font-bold text-white">
-
-{insights.aiConfidence}%
-
-</div>
-
-</div>
-
-{/* Occupancy */}
-
-<div className="rounded-xl border border-cyan-500/20 bg-slate-800 p-4 md:p-5">
-
-<div className="mb-4 flex items-center gap-2">
-
-<Gauge className="h-5 w-5 text-cyan-400"/>
-
-<span className="text-white">
-
-Occupancy
-
-</span>
-
-</div>
-
-<div className="text-center">
-
-<div className="text-2xl md:text-3xl font-bold text-cyan-300">
-
-{insights.occupancyForecast}%
-
-</div>
-
-</div>
-
-</div>
-
-{/* Revenue Confidence */}
-
-<div className="rounded-xl border border-orange-500/20 bg-slate-800 p-4 md:p-5">
-
-<div className="mb-4 flex items-center gap-2">
-
-<DollarSign className="h-5 w-5 text-orange-400"/>
-
-<span className="text-white">
-
-Revenue Confidence
-
-</span>
-
-</div>
-
-<div className="text-center">
-
-<div className="text-2xl md:text-3xl font-bold text-orange-300">
-
-{insights.revenueConfidence}%
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
-
-          <h3 className="mb-5 text-lg font-semibold text-white">
-
-            Reservation Trend
-
-          </h3>
-
-          <div className="h-72">
-
-            <ResponsiveContainer>
-
-              <LineChart
-                data={insights.forecastNextWeek}
+              <span
+                className={`inline-flex rounded-full px-3 py-1 text-sm font-bold ${decisionColorClasses.badge}`}
               >
-       
-                <XAxis dataKey="day" />
+                {executiveDecision.priority}
+              </span>
 
-                <YAxis />
-
-                <Tooltip />
-
-                <Line
-                  type="monotone"
-                  dataKey="predicted"
-                  stroke="#06b6d4"
-                  strokeWidth={3}
-                />
-
-              </LineChart>
-
-            </ResponsiveContainer>
-
+            </div>
           </div>
 
-        </div>
+          {/* Action */}
 
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Recommended Action
+            </div>
 
-          <h3 className="mb-5 text-lg font-semibold text-white">
+            <div className="mt-2 font-semibold text-white">
+              {executiveDecision.action}
+            </div>
 
-            Revenue Projection
+            <div className="mt-2 flex items-center gap-2">
 
-          </h3>
-
-          <div className="h-72">
-
-            <ResponsiveContainer>
-
-              <AreaChart
-                data={revenueProjection}
-              >
-
-                <XAxis dataKey="day" />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Area
-                  type="monotone"
-                  dataKey="revenue"
-                  stroke="#22c55e"
-                  fill="#22c55e33"
-                />
-
-              </AreaChart>
-
-            </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
-
-          <h3 className="mb-5 text-lg font-semibold text-white">
-
-            Staff Forecast
-
-          </h3>
-
-          <div className="h-72">
-
-            <ResponsiveContainer>
-
-              <BarChart
-                data={staffProjection}
-              >
-
-                <XAxis dataKey="day" />
-
-                <YAxis />
-
-                <Tooltip />
-
-                <Bar
-                  dataKey="staff"
-                  fill="#3b82f6"
-                />
-
-              </BarChart>
-
-            </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
-        <div className="mt-8 rounded-xl border border-white/10 bg-slate-800 p-6">
-
-          <h3 className="mb-5 text-lg font-semibold text-white">
-
-            Occupancy Score
-
-          </h3>
-
-          <div className="flex justify-center">
-
-            <RadialBarChart
-              width={250}
-              height={250}
-              innerRadius="70%"
-              outerRadius="100%"
-              data={occupancyData}
-              startAngle={180}
-              endAngle={0}
-            >
-
-              <RadialBar
-                dataKey="value"
-                fill="#06b6d4"
+              <span
+                className={`h-2 w-2 rounded-full animate-pulse ${decisionColorClasses.dot}`}
               />
 
-            </RadialBarChart>
+              <span className="text-xs text-white/40">
+                {executiveDecision.status}
+              </span>
 
+            </div>
           </div>
 
-          <div className="text-center text-4xl font-bold text-cyan-400">
+          {/* Confidence */}
 
-            {insights.utilizationRate}%
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Confidence
+            </div>
 
+            <div className="mt-2 text-lg font-bold text-emerald-400">
+              {Number(
+                executiveDecision.confidence ?? 0
+              )}%
+            </div>
+
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-white/10">
+
+              <div
+                className="h-full rounded-full bg-emerald-400 transition-all duration-700"
+                style={{
+                  width: `${Math.min(
+                    100,
+                    Math.max(
+                      0,
+                      Number(
+                        executiveDecision.confidence ?? 0
+                      )
+                    )
+                  )}%`,
+                }}
+              />
+
+            </div>
+          </div>
+
+          {/* Impact */}
+
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Expected Impact
+            </div>
+
+            <div className="mt-2 text-lg font-bold text-orange-400">
+              {executiveDecision.impact}
+            </div>
+
+            <div className="mt-2 flex items-center gap-2">
+
+              <Sparkles className="h-4 w-4 text-yellow-400" />
+
+              <span className="text-xs text-white/40">
+                AI Optimized
+              </span>
+
+            </div>
           </div>
 
         </div>
 
-      </div>
+      </section>
 
+      {/* ======================================================
+          AI ACTION PLANNER
+      ====================================================== */}
+
+      <section className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-4 sm:p-6">
+
+        <div className="mb-5 flex items-start gap-3 sm:items-center">
+
+          <Activity className="h-6 w-6 text-cyan-400" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-white sm:text-xl">
+              AI Action Planner
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Today's recommended operational timeline
+            </p>
+          </div>
+
+        </div>
+
+        <div className="space-y-3">
+
+          {actionTimeline.length === 0 ? (
+
+            <div className="rounded-lg bg-slate-900 px-4 py-3 text-sm text-white/50">
+              No operational actions are currently scheduled.
+            </div>
+
+          ) : (
+
+            actionTimeline.map(
+              (item: any, index: number) => (
+
+                <div
+                  key={`${item?.time ?? "action"}-${index}`}
+                  className="flex flex-col gap-3 rounded-lg border border-white/10 bg-slate-900 px-4 py-3 md:flex-row md:items-center md:justify-between"
+                >
+
+                  <div>
+
+                    <div className="text-sm text-cyan-400">
+                      {item?.time ?? "N/A"}
+                    </div>
+
+                    <div className="mt-1 font-medium text-white">
+                      {item?.title ?? "Operational task"}
+                    </div>
+
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2">
+
+                    <input
+                      type="checkbox"
+                      checked={
+                        item?.status === "completed"
+                      }
+                      readOnly
+                      aria-label={`Task ${index + 1} status`}
+                      className="h-4 w-4 accent-cyan-400"
+                    />
+
+                    <span
+                      className={`
+                        rounded-full
+                        px-3
+                        py-1
+                        text-xs
+                        font-semibold
+                        ${
+                          item?.status === "completed"
+                            ? "bg-emerald-500/20 text-emerald-400"
+                            : item?.status === "active"
+                            ? "bg-cyan-500/20 text-cyan-400"
+                            : "bg-white/10 text-white/50"
+                        }
+                      `}
+                    >
+                      {item?.status ?? "pending"}
+                    </span>
+
+                  </div>
+
+                </div>
+
+              )
+            )
+
+          )}
+
+        </div>
+
+      </section>      
+
+      {/* ============================================================
+          MANAGER WORKFLOW
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 md:p-6">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-white">
+              Manager Workflow
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Today's completion status
+            </p>
+          </div>
+
+          <div className="text-left sm:text-right">
+            <div className="text-3xl font-bold text-cyan-300">
+              {insights.workflowProgress}%
+            </div>
+
+            <div className="text-xs text-white/40">
+              Completed
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-5 h-3 overflow-hidden rounded-full bg-white/10">
+          <div
+            className="h-full rounded-full bg-cyan-400 transition-all duration-700"
+            style={{
+              width: `${Math.min(
+                100,
+                Math.max(0, insights.workflowProgress)
+              )}%`,
+            }}
+          />
+        </div>
+
+        <div className="mt-5 grid grid-cols-2 gap-4 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <div className="text-sm text-white/40">
+              Tasks
+            </div>
+
+            <div className="mt-1 font-semibold text-white">
+              {insights.completedTasks} / {insights.totalTasks}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Manager Productivity
+            </div>
+
+            <div className="mt-1 font-semibold text-emerald-400">
+              {Math.round(insights.managerProductivity)}%
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          EXECUTIVE AI BRAIN
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-900 p-4 md:p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <BrainCircuit className="mt-0.5 h-7 w-7 shrink-0 text-cyan-400" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-cyan-300 md:text-xl">
+              Executive AI Brain
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Consolidated restaurant intelligence
+            </p>
+          </div>
+        </div>
+
+        {/* Health Score */}
+        <div className="mb-6 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 md:p-5">
+          <div className="text-xs uppercase tracking-wide text-white/40">
+            Restaurant Health
+          </div>
+
+          <div className="mt-2 text-3xl font-bold text-cyan-300 md:text-4xl">
+            {executiveBrain.healthScore}%
+          </div>
+
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+            <div
+              className="h-full rounded-full bg-cyan-400 transition-all duration-700"
+              style={{
+                width: `${Math.min(
+                  100,
+                  Math.max(0, executiveBrain.healthScore)
+                )}%`,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* Executive Priority */}
+        <div className="mb-6 rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 md:p-5">
+          <div className="text-xs uppercase tracking-wide text-white/40">
+            Executive Priority
+          </div>
+
+          <div className="mt-2 text-xl font-bold text-orange-400 md:text-2xl">
+            {executiveBrain.executivePriority}
+          </div>
+        </div>
+
+        {/* Insights / Risks / Opportunities */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          {/* Insights */}
+          <div>
+            <div className="mb-3 flex items-center gap-2 font-semibold text-emerald-400">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Insights
+            </div>
+
+            <div className="space-y-2">
+              {executiveBrain.insights?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-emerald-500/5 px-3 py-2 text-xs leading-6 text-white/80 md:text-sm"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Risks */}
+          <div>
+            <div className="mb-3 flex items-center gap-2 font-semibold text-red-400">
+              <span className="h-2 w-2 rounded-full bg-red-400" />
+              Risks
+            </div>
+
+            <div className="space-y-2">
+              {executiveBrain.risks?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-red-500/5 px-3 py-2 text-xs leading-6 text-white/80 md:text-sm"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Opportunities */}
+          <div>
+            <div className="mb-3 flex items-center gap-2 font-semibold text-cyan-400">
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+              Opportunities
+            </div>
+
+            <div className="space-y-2">
+              {executiveBrain.opportunities?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-cyan-500/5 px-3 py-2 text-xs leading-6 text-white/80 md:text-sm"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Executive Actions */}
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div>
+            <div className="mb-3 font-semibold text-cyan-300">
+              Executive Actions
+            </div>
+
+            <div className="space-y-2">
+              {executiveBrain.executiveActions?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-cyan-500/10 px-3 py-2 text-sm leading-6 text-cyan-100"
+                  >
+                    ✓ {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Executive Warnings */}
+          <div>
+            <div className="mb-3 font-semibold text-red-400">
+              Executive Warnings
+            </div>
+
+            <div className="space-y-2">
+              {executiveBrain.executiveWarnings?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-200"
+                  >
+                    ⚠ {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Strategy Grid */}
+        <div className="mt-8 grid gap-6 lg:grid-cols-2">
+          {/* Revenue Strategy */}
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
+            <h3 className="mb-3 font-semibold text-emerald-300">
+              Revenue Strategy
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.revenueStrategy?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="text-sm leading-6 text-white/80"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Marketing Strategy */}
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4 md:p-5">
+            <h3 className="mb-3 font-semibold text-cyan-300">
+              Marketing Strategy
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.marketingStrategy?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="text-sm leading-6 text-white/80"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Staffing Strategy */}
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 md:p-5">
+            <h3 className="mb-3 font-semibold text-orange-300">
+              Staff Strategy
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.staffingStrategy?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="text-sm leading-6 text-white/80"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Customer Strategy */}
+          <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-4 md:p-5">
+            <h3 className="mb-3 font-semibold text-pink-300">
+              Customer Strategy
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.customerStrategy?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="text-sm leading-6 text-white/80"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Growth Strategy */}
+          <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4 md:p-5 lg:col-span-2">
+            <h3 className="mb-3 font-semibold text-violet-300">
+              Growth Strategy
+            </h3>
+
+            <div className="grid gap-2 md:grid-cols-2">
+              {executiveBrain.growthStrategy?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="text-sm leading-6 text-white/80"
+                  >
+                    • {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CEO WEEKLY AI REPORT
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <BrainCircuit className="h-6 w-6 text-yellow-300" />
+
+          <h2 className="text-lg font-semibold text-yellow-300 md:text-xl">
+            CEO Weekly AI Report
+          </h2>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div>
+            <div className="text-sm text-white/40">
+              AI Summary
+            </div>
+
+            <div className="mt-2 text-sm leading-7 text-white/80">
+              {executiveBrain.ceoSummary}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              CEO Decision
+            </div>
+
+            <div className="mt-2 text-sm leading-7 text-cyan-300">
+              {executiveBrain.ceoDecision}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Business Outlook
+            </div>
+
+            <div className="mt-2 text-sm leading-7 text-emerald-300">
+              {executiveBrain.ceoOutlook}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI AUTONOMOUS OPTIMIZATION
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <Sparkles className="h-6 w-6 text-purple-300" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-purple-300 md:text-xl">
+              AI Autonomous Optimization
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              AI-generated optimization opportunities
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div>
+            <h3 className="mb-4 font-semibold text-cyan-300">
+              Optimization Tasks
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.optimizationTasks?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-cyan-500/10 px-3 py-2 text-sm leading-6 text-cyan-100"
+                  >
+                    ⚙ {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-4 font-semibold text-emerald-300">
+              Expected Benefits
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.optimizationBenefits?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm leading-6 text-emerald-100"
+                  >
+                    ✓ {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          RESTAURANT DIGITAL TWIN
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <BrainCircuit className="mt-0.5 h-6 w-6 shrink-0 text-indigo-300" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-indigo-300 md:text-xl">
+              Restaurant Digital Twin
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              AI simulation of future restaurant performance
+            </p>
+          </div>
+        </div>
+
+        {/* Future Simulation */}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 md:p-5">
+            <h3 className="mb-4 font-semibold text-cyan-300">
+              Future Simulation
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.simulations?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-indigo-500/10 px-3 py-2 text-sm leading-6 text-white/80"
+                  >
+                    🔮 {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+
+          {/* Simulation Risks */}
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 md:p-5">
+            <h3 className="mb-4 font-semibold text-red-300">
+              Future Risks
+            </h3>
+
+            <div className="space-y-2">
+              {executiveBrain.simulationRisks?.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-200"
+                  >
+                    ⚠ {item}
+                  </div>
+                )
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Simulation Revenue */}
+        <div className="mt-6 rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4 md:p-5">
+          <h3 className="mb-4 font-semibold text-emerald-300">
+            Revenue Forecast
+          </h3>
+
+          <div className="space-y-2">
+            {executiveBrain.simulationRevenue?.map(
+              (item: string, index: number) => (
+                <div
+                  key={index}
+                  className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm leading-6 text-emerald-100"
+                >
+                  💰 {item}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          BUSINESS INTELLIGENCE SCORECARD
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <Activity className="h-6 w-6 text-emerald-300" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-emerald-300 md:text-xl">
+              Business Intelligence Scorecard
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Executive-level restaurant performance indicators
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+          {/* Profitability */}
+          <div className="rounded-xl border border-emerald-500/20 bg-slate-900/50 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Profitability
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-400 md:text-3xl">
+              {executiveBrain.profitabilityScore}%
+            </div>
+          </div>
+
+          {/* Business */}
+          <div className="rounded-xl border border-cyan-500/20 bg-slate-900/50 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Business
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-400 md:text-3xl">
+              {executiveBrain.businessScore}%
+            </div>
+          </div>
+
+          {/* Customers */}
+          <div className="rounded-xl border border-pink-500/20 bg-slate-900/50 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Customers
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-pink-400 md:text-3xl">
+              {executiveBrain.customerHealth}%
+            </div>
+          </div>
+
+          {/* Operations */}
+          <div className="rounded-xl border border-orange-500/20 bg-slate-900/50 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Operations
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-orange-400 md:text-3xl">
+              {executiveBrain.operationalEfficiency}%
+            </div>
+          </div>
+
+          {/* Revenue */}
+          <div className="rounded-xl border border-yellow-500/20 bg-slate-900/50 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Revenue
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-yellow-400 md:text-3xl">
+              {executiveBrain.revenueStability}%
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          EXECUTIVE KPI BENCHMARK
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-yellow-300 md:text-xl">
+            Executive KPI Benchmark
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Comparison of restaurant KPIs against executive targets
+          </p>
+        </div>
+
+        <div className="space-y-3">
+          {executiveBrain.benchmarkResults?.map(
+            (item: string, index: number) => (
+              <div
+                key={index}
+                className="flex flex-col gap-3 rounded-xl bg-slate-800 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="text-sm leading-6 text-white">
+                  {item}
+                </span>
+
+                <span className="w-fit rounded-full bg-cyan-500/20 px-3 py-1 text-xs font-semibold text-cyan-300">
+                  {executiveBrain.benchmarkStatus?.[index] ?? "Monitoring"}
+                </span>
+              </div>
+            )
+          )}
+        </div>
+      </section>
+
+      {/* ============================================================
+          MULTI-BRANCH COMPARISON
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-indigo-300 md:text-xl">
+            Multi-Branch Comparison
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Comparative performance across restaurant branches
+          </p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="min-w-[720px] w-full text-left">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  Branch
+                </th>
+
+                <th className="px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  Revenue
+                </th>
+
+                <th className="px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  Occupancy
+                </th>
+
+                <th className="px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  Growth
+                </th>
+
+                <th className="px-3 pb-3 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {executiveBrain.branchComparison?.map(
+                (
+                  branch: {
+                    branch: string;
+                    revenue: number | string;
+                    occupancy: number;
+                    growth: number;
+                    status: string;
+                  },
+                  index: number
+                ) => (
+                  <tr
+                    key={`${branch.branch}-${index}`}
+                    className="border-b border-white/5"
+                  >
+                    <td className="px-3 py-3 text-sm text-white">
+                      {branch.branch}
+                    </td>
+
+                    <td className="px-3 py-3 text-sm font-semibold text-emerald-300">
+                      $
+                      {typeof branch.revenue === "number"
+                        ? branch.revenue.toLocaleString()
+                        : branch.revenue}
+                    </td>
+
+                    <td className="px-3 py-3 text-sm font-semibold text-cyan-300">
+                      {branch.occupancy}%
+                    </td>
+
+                    <td className="px-3 py-3 text-sm font-semibold text-yellow-300">
+                      {branch.growth}%
+                    </td>
+
+                    <td className="px-3 py-3 text-sm font-semibold text-pink-300">
+                      {branch.status}
+                    </td>
+                  </tr>
+                )
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CEO DAILY BRIEF
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-emerald-500/20 bg-slate-900 p-5 md:p-6">
+        <div className="mb-6 flex items-center gap-3">
+          <BrainCircuit className="h-6 w-6 text-emerald-300" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-emerald-300 md:text-xl">
+              Executive Daily Brief
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              High-priority intelligence for today's management decisions
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* Headline */}
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Headline
+            </div>
+
+            <div className="mt-2 text-xl font-bold leading-8 text-emerald-300 md:text-2xl">
+              {executiveBrain.executiveHeadline}
+            </div>
+          </div>
+
+          {/* Summary */}
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Summary
+            </div>
+
+            <div className="mt-2 text-sm leading-7 text-white/80 md:text-base">
+              {executiveBrain.executiveSummary}
+            </div>
+          </div>
+
+          {/* Today's Focus */}
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Today's Focus
+            </div>
+
+            <div className="mt-2 font-semibold leading-7 text-cyan-300">
+              {executiveBrain.todayFocus}
+            </div>
+          </div>
+
+          {/* Executive Alerts */}
+          <div>
+            <div className="mb-3 text-xs uppercase tracking-wide text-white/40">
+              Executive Alerts
+            </div>
+
+            {executiveBrain.executiveAlerts?.length === 0 ? (
+              <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-400">
+                No critical alerts.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {executiveBrain.executiveAlerts?.map(
+                  (alert: string, index: number) => (
+                    <div
+                      key={index}
+                      className="rounded-lg bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-300"
+                    >
+                      ⚠ {alert}
+                    </div>
+                  )
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI REVENUE FORECAST
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-cyan-300 md:text-xl">
+            AI Revenue Forecast
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Predictive revenue outlook generated from restaurant performance
+            signals
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {/* Next Week */}
+          <div className="rounded-xl border border-emerald-500/20 bg-slate-900/50 p-4">
+            <div className="text-sm text-white/40">
+              Next Week
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300 md:text-3xl">
+              $
+              {typeof executiveBrain.nextWeekRevenue === "number"
+                ? executiveBrain.nextWeekRevenue.toLocaleString()
+                : executiveBrain.nextWeekRevenue}
+            </div>
+          </div>
+
+          {/* Next Month */}
+          <div className="rounded-xl border border-cyan-500/20 bg-slate-900/50 p-4">
+            <div className="text-sm text-white/40">
+              Next Month
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300 md:text-3xl">
+              $
+              {typeof executiveBrain.nextMonthRevenue === "number"
+                ? executiveBrain.nextMonthRevenue.toLocaleString()
+                : executiveBrain.nextMonthRevenue}
+            </div>
+          </div>
+
+          {/* Confidence */}
+          <div className="rounded-xl border border-yellow-500/20 bg-slate-900/50 p-4">
+            <div className="text-sm text-white/40">
+              Confidence
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-yellow-300 md:text-3xl">
+              {executiveBrain.revenueConfidence}%
+            </div>
+          </div>
+
+          {/* Trend */}
+          <div className="rounded-xl border border-pink-500/20 bg-slate-900/50 p-4">
+            <div className="text-sm text-white/40">
+              Trend
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-pink-300 md:text-3xl">
+              {executiveBrain.revenueTrend}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI RESERVATION FORECAST
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-purple-500/20 bg-purple-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-purple-300 md:text-xl">
+            AI Reservation Forecast
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Expected reservation demand across upcoming periods
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Tomorrow
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300 md:text-3xl">
+              {executiveBrain.tomorrowReservations}
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Next Week
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300 md:text-3xl">
+              {executiveBrain.nextWeekReservations}
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Next Month
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-yellow-300 md:text-3xl">
+              {executiveBrain.nextMonthReservations}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Trend
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-pink-300">
+              {executiveBrain.reservationTrend}
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Confidence
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-cyan-300">
+              {executiveBrain.reservationConfidence}%
+            </div>
+          </div>
+
+          <div className="rounded-xl bg-slate-900/40 p-4">
+            <div className="text-sm text-white/40">
+              Risk
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-red-300">
+              {executiveBrain.reservationRisk}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI OCCUPANCY PREDICTION
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-orange-500/20 bg-orange-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-orange-300 md:text-xl">
+            AI Occupancy Prediction
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Predicted utilization and operational recommendation
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <div className="text-sm text-white/40">
+              Predicted Occupancy
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-orange-300">
+              {executiveBrain.predictedOccupancy}%
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Trend
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300">
+              {executiveBrain.occupancyTrend}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Confidence
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300">
+              {executiveBrain.occupancyConfidence}%
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Recommendation
+            </div>
+
+            <div className="mt-2 text-sm leading-6 text-white/80">
+              {executiveBrain.occupancyRecommendation}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI SEASONAL TREND
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-pink-500/20 bg-pink-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-pink-300 md:text-xl">
+            AI Seasonal Trend
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Seasonal demand, revenue and occupancy intelligence
+          </p>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div>
+            <div className="text-sm text-white/40">
+              Current Season
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-pink-300 md:text-3xl">
+              {executiveBrain.currentSeason}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Growth
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300 md:text-3xl">
+              {executiveBrain.seasonalGrowth}%
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Predicted Revenue
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300 md:text-3xl">
+              $
+              {typeof executiveBrain.seasonalRevenue === "number"
+                ? executiveBrain.seasonalRevenue.toLocaleString()
+                : executiveBrain.seasonalRevenue}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-5 lg:grid-cols-3">
+          <div>
+            <div className="text-sm text-white/40">
+              Reservations
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-yellow-300">
+              {executiveBrain.seasonalReservations}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Occupancy
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-orange-300">
+              {executiveBrain.seasonalOccupancy}%
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Recommendation
+            </div>
+
+            <div className="mt-2 text-sm leading-6 text-white/80">
+              {executiveBrain.seasonalRecommendation}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI EVENT & HOLIDAY IMPACT
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-yellow-300 md:text-xl">
+            AI Event &amp; Holiday Impact
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Expected effect of events and holidays on restaurant demand
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div>
+            <div className="text-sm text-white/40">
+              Event
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-yellow-300">
+              {executiveBrain.eventName}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Demand
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-orange-300">
+              {executiveBrain.demandLevel}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Business Boost
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-emerald-300">
+              {executiveBrain.businessBoost}%
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm text-white/40">
+              Revenue
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-cyan-300">
+              $
+              {typeof executiveBrain.holidayRevenue === "number"
+                ? executiveBrain.holidayRevenue.toLocaleString()
+                : executiveBrain.holidayRevenue}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 rounded-xl bg-yellow-500/5 p-4">
+          <div className="text-sm text-white/40">
+            Recommendation
+          </div>
+
+          <div className="mt-2 text-sm leading-7 text-white/80">
+            {executiveBrain.holidayRecommendation}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI FORECAST & PERFORMANCE OUTLOOK
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-indigo-500/20 bg-indigo-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <TrendingUp className="mt-0.5 h-6 w-6 shrink-0 text-indigo-400" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-indigo-300 md:text-xl">
+              AI Forecast & Performance Outlook
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Predictive business performance for the coming period
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Predicted Revenue
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300">
+              $
+              {Number(
+                insights.predictedRevenue ?? executiveBrain.nextWeekRevenue ?? 0
+              ).toLocaleString()}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Reservations
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300">
+              {insights.predictedReservations ??
+                executiveBrain.nextWeekReservations ??
+                0}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Occupancy
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-orange-300">
+              {insights.occupancyForecast ??
+                executiveBrain.predictedOccupancy ??
+                0}
+              %
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              AI Confidence
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-violet-300">
+              {insights.aiConfidence ??
+                executiveBrain.revenueConfidence ??
+                0}
+              %
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CUSTOMER INTELLIGENCE
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <Users className="mt-0.5 h-6 w-6 shrink-0 text-emerald-400" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-emerald-300 md:text-xl">
+              Customer Intelligence
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Customer loyalty, retention and relationship health
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              VIP Customers
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-yellow-300">
+              {insights.vipCustomers ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Returning Customers
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-cyan-300">
+              {insights.returningCustomers ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              At Risk
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-red-300">
+              {insights.atRiskCustomers ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Satisfaction
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300">
+              {insights.customerSatisfaction ?? 0}%
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Loyalty Score
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-amber-300">
+              {insights.loyaltyScore ?? 0}
+            </div>
+
+            <div className="mt-3 text-sm text-white/70">
+              VIP Status:{" "}
+              <span className="font-semibold text-cyan-300">
+                {insights.vipStatus ?? "Normal"}
+              </span>
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Retention Priority
+            </div>
+
+            <div className="mt-2 text-xl font-bold text-pink-300">
+              {insights.retentionPriority ?? "Monitor"}
+            </div>
+
+            <div className="mt-3 text-sm text-white/70">
+              Premium Customers:{" "}
+              <span className="font-semibold text-purple-300">
+                {insights.premiumCustomers ?? 0}
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          KPI PERFORMANCE SUMMARY
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-5 md:p-6">
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold text-white md:text-xl">
+            KPI Performance Summary
+          </h2>
+
+          <p className="mt-1 text-sm text-white/40">
+            Overall restaurant performance indicators
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Business Score
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-cyan-300">
+              {executiveBrain.businessScore ?? 0}%
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Customer Health
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-pink-300">
+              {executiveBrain.customerHealth ?? 0}%
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Operational Efficiency
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-orange-300">
+              {executiveBrain.operationalEfficiency ?? 0}%
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-4">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Revenue Stability
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-yellow-300">
+              {executiveBrain.revenueStability ?? 0}%
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          FUTURE RISKS & OPPORTUNITIES
+      ============================================================ */}
+
+      <section className="mt-8 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-5 md:p-6">
+          <h2 className="mb-5 text-lg font-semibold text-red-300 md:text-xl">
+            Future Risks
+          </h2>
+
+          <div className="space-y-2">
+            {executiveBrain.simulationRisks?.length ? (
+              executiveBrain.simulationRisks.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-red-500/10 px-3 py-2 text-sm leading-6 text-red-200"
+                  >
+                    ⚠ {item}
+                  </div>
+                )
+              )
+            ) : (
+              <div className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm text-emerald-300">
+                No major future risks detected.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 md:p-6">
+          <h2 className="mb-5 text-lg font-semibold text-emerald-300 md:text-xl">
+            Expected Revenue Opportunities
+          </h2>
+
+          <div className="space-y-2">
+            {executiveBrain.simulationRevenue?.length ? (
+              executiveBrain.simulationRevenue.map(
+                (item: string, index: number) => (
+                  <div
+                    key={index}
+                    className="rounded-lg bg-emerald-500/10 px-3 py-2 text-sm leading-6 text-emerald-200"
+                  >
+                    💰 {item}
+                  </div>
+                )
+              )
+            ) : (
+              <div className="rounded-lg bg-white/5 px-3 py-2 text-sm text-white/50">
+                No revenue opportunities available.
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          CEO OUTLOOK
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-violet-500/20 bg-violet-500/5 p-5 md:p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <BrainCircuit className="h-6 w-6 text-violet-400" />
+
+          <h2 className="text-lg font-semibold text-violet-300 md:text-xl">
+            CEO Business Outlook
+          </h2>
+        </div>
+
+        <div className="rounded-xl border border-violet-500/20 bg-violet-500/10 p-4 md:p-5">
+          <div className="text-xs uppercase tracking-wide text-white/40">
+            Business Outlook
+          </div>
+
+          <div className="mt-2 text-xl font-bold leading-7 text-emerald-300">
+            {executiveBrain.ceoOutlook ?? "Business performance is being monitored."}
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          AI BUSINESS INTELLIGENCE
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-cyan-500/5 p-5 md:p-6">
+        <div className="mb-6 flex items-start gap-3">
+          <BrainCircuit className="mt-0.5 h-6 w-6 shrink-0 text-cyan-400" />
+
+          <div>
+            <h2 className="text-lg font-semibold text-cyan-300 md:text-xl">
+              AI Predictive Business Intelligence
+            </h2>
+
+            <p className="mt-1 text-sm text-white/40">
+              Predictive signals for revenue, reservations and operational risk
+            </p>
+          </div>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-4">
+            <DollarSign className="mb-3 h-6 w-6 text-emerald-400" />
+
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Predicted Revenue
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-white">
+              $
+              {Number(insights.predictedRevenue ?? 0).toLocaleString()}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+            <Users className="mb-3 h-6 w-6 text-cyan-400" />
+
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Predicted Reservations
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-white">
+              {insights.predictedReservations ?? 0}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4">
+            <ShieldAlert className="mb-3 h-6 w-6 text-orange-400" />
+
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Cancellation Risk
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-white">
+              {insights.cancellationRisk ?? "Low"}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-violet-500/20 bg-violet-500/5 p-4">
+            <BrainCircuit className="mb-3 h-6 w-6 text-violet-400" />
+
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              AI Confidence
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-white">
+              {insights.aiConfidence ?? 0}%
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          EXECUTIVE RECOMMENDATIONS
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-800 p-5 md:p-6">
+        <h2 className="mb-6 text-lg font-semibold text-cyan-300 md:text-xl">
+          Executive Recommendations
+        </h2>
+
+        <div className="space-y-5">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Priority
+            </div>
+
+            <div className="mt-2 font-semibold leading-6 text-cyan-300">
+              {insights.executivePriority ?? "Monitor business performance"}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Promotion Strategy
+            </div>
+
+            <div className="mt-2 font-semibold leading-6 text-emerald-300">
+              {insights.promotionRecommendation ??
+                "Maintain targeted promotional activity."}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Staff Recommendation
+            </div>
+
+            <div className="mt-2 font-semibold leading-6 text-orange-300">
+              {insights.staffRecommendation ??
+                "Maintain staffing according to forecast demand."}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============================================================
+          REVENUE PROJECTION
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-4 md:p-6">
+        <h2 className="mb-5 text-lg font-semibold text-cyan-300">
+          Revenue Projection
+        </h2>
+
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={revenueProjection ?? []}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#ffffff10"
+              />
+
+              <XAxis
+                dataKey="day"
+                stroke="#ffffff50"
+              />
+
+              <YAxis
+                stroke="#ffffff50"
+              />
+
+              <Tooltip />
+
+              <Area
+                type="monotone"
+                dataKey="revenue"
+                stroke="#22c55e"
+                fill="#22c55e33"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* ============================================================
+          STAFF FORECAST
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-white/10 bg-slate-800 p-4 md:p-6">
+        <h2 className="mb-5 text-lg font-semibold text-cyan-300">
+          Staff Forecast
+        </h2>
+
+        <div className="h-72 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={staffProjection ?? []}>
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#ffffff10"
+              />
+
+              <XAxis
+                dataKey="day"
+                stroke="#ffffff50"
+              />
+
+              <YAxis
+                stroke="#ffffff50"
+              />
+
+              <Tooltip />
+
+              <Bar
+                dataKey="staff"
+                fill="#3b82f6"
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </section>
+
+      {/* ============================================================
+          OCCUPANCY SCORE
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-cyan-500/20 bg-slate-800 p-5 md:p-6">
+        <h2 className="mb-5 text-lg font-semibold text-cyan-300">
+          Occupancy Score
+        </h2>
+
+        <div className="flex justify-center">
+          <RadialBarChart
+            width={250}
+            height={250}
+            innerRadius="70%"
+            outerRadius="100%"
+            data={[
+              {
+                value: Math.min(
+                  100,
+                  Math.max(0, Number(insights.occupancyForecast ?? 0))
+                ),
+              },
+            ]}
+            startAngle={180}
+            endAngle={0}
+          >
+            <PolarAngleAxis
+              type="number"
+              domain={[0, 100]}
+              tick={false}
+            />
+
+            <RadialBar
+              dataKey="value"
+              fill="#06b6d4"
+              cornerRadius={12}
+            />
+          </RadialBarChart>
+        </div>
+
+        <div className="text-center text-4xl font-bold text-cyan-400">
+          {insights.utilizationRate ?? 0}%
+        </div>
+      </section>
+
+      {/* ============================================================
+          FINAL EXECUTIVE STATUS
+      ============================================================ */}
+
+      <section className="mt-8 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-5 md:p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Executive Status
+            </div>
+
+            <div className="mt-2 text-2xl font-bold text-emerald-300">
+              {executiveBrain.executiveStatus ?? "Operational"}
+            </div>
+          </div>
+
+          <div className="text-left md:text-right">
+            <div className="text-xs uppercase tracking-wide text-white/40">
+              Restaurant Health
+            </div>
+
+            <div className="mt-2 text-3xl font-bold text-cyan-300">
+              {executiveBrain.healthScore ?? 0}%
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
   );
-
 }
 
 export default memo(RestaurantInsights);

@@ -132,42 +132,26 @@ Ask anything about your restaurant.
 
 </div>
 
-<div className="h-80 overflow-y-auto rounded-xl bg-slate-800 p-4">
+<div className="max-h-80 overflow-y-auto rounded-xl bg-slate-800 p-4">
 
-{messages.length===0&&(
+  {messages.length === 0 && (
+    <div className="py-4 text-sm text-white/40">
+      Start a conversation...
+    </div>
+  )}
 
-<div className="text-white/40">
-
-Start a conversation...
-
-</div>
-
-)}
-
-{messages.map(message=>(
-
-<div
-
-key={message.id}
-
-className={`mb-4
-
-${
-message.role==="assistant"
-
-?"text-cyan-300"
-
-:"text-white"
-
-}`}
-
->
-
-{message.text}
-
-</div>
-
-))}
+  {messages.map((message) => (
+    <div
+      key={message.id}
+      className={`mb-4 ${
+        message.role === "assistant"
+          ? "text-cyan-300"
+          : "text-white"
+      }`}
+    >
+      {message.text}
+    </div>
+  ))}
 
 </div>
 
