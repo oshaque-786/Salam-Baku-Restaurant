@@ -154,16 +154,8 @@ function RestaurantInsights({
     insights?.confirmationRate ?? 0
   );
 
-  const healthScore = Math.min(
-    100,
-    Math.max(
-      0,
-      Math.round(
-        70 +
-          weeklyGrowth -
-          cancellationRate
-      )
-    )
+  const healthScore = Number(
+    insights?.restaurantHealth ?? 0
   );
 
   const expectedRevenue = Number(
@@ -175,9 +167,7 @@ function RestaurantInsights({
   );
 
   const aiConfidence = Number(
-    insights?.aiConfidence ??
-      executiveBrain?.revenueConfidence ??
-      0
+    insights?.aiConfidence ?? 0
   );
 
   /*
@@ -192,8 +182,9 @@ function RestaurantInsights({
   const revenueProjection = forecastNextWeek.map(
     (day: any) => ({
       day: day?.day ?? "",
-      revenue:
-        Number(day?.predicted ?? 0) * 45,
+      revenue: Number(
+        day?.predictedRevenue ?? 0
+      ),
     })
   );
 
@@ -207,11 +198,8 @@ function RestaurantInsights({
   const staffProjection = forecastNextWeek.map(
     (day: any) => ({
       day: day?.day ?? "",
-      staff: Math.max(
-        2,
-        Math.ceil(
-          Number(day?.predicted ?? 0) / 25
-        )
+      staff: Number(
+        day?.recommendedStaff ?? 0
       ),
     })
   );
@@ -223,19 +211,7 @@ function RestaurantInsights({
    */
 
   const executiveDecision =
-    insights?.executiveDecision ?? {
-      priority:
-        insights?.executivePriority ??
-        executiveBrain?.executivePriority ??
-        "Monitor",
-      action:
-        insights?.promotionRecommendation ??
-        "Continue monitoring restaurant performance.",
-      confidence: aiConfidence,
-      impact: "Moderate",
-      status: "Monitoring",
-      color: "cyan",
-    };
+    insights?.executiveDecision;
 
   const decisionColor =
     executiveDecision?.color ?? "cyan";
@@ -318,14 +294,10 @@ function RestaurantInsights({
 
           <MetricCard
             label="Busiest Day"
-            value={
-              insights?.busiestWeekDay?.day ??
-              insights?.peakReservationDay?.day ??
-              "N/A"
-            }
+            value={insights?.busiestDay ?? "N/A"}
             description={
-              insights?.busiestWeekDay?.count != null
-                ? `${insights.busiestWeekDay.count} reservations`
+              insights?.busiestDayReservations != null
+                ? `${insights.busiestDayReservations} reservations`
                 : "Reservation demand"
             }
             icon={
@@ -372,8 +344,7 @@ function RestaurantInsights({
         </div>
 
         <p className="text-sm leading-6 text-white/80 sm:text-base">
-          {insights?.weeklyRecommendation ??
-            executiveBrain?.executiveInsight ??
+          {insights?.executiveInsight ??
             "No recommendation is currently available."}
         </p>
 
@@ -585,7 +556,7 @@ function RestaurantInsights({
 
                   <span className="font-semibold text-cyan-400">
                     {Number(
-                      day?.predicted ?? 0
+                      day?.predictedReservations ?? 0
                     )} Reservations
                   </span>
 

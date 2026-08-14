@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 
 const AVERAGE_RESERVATION_VALUE = 45;
-const RESTAURANT_SEAT_CAPACITY = 60;
 
 interface ExecutiveInput {
   totalReservations: number;
@@ -12,6 +11,11 @@ interface ExecutiveInput {
   occupancyRate: number;
   cancellationRate: number;
   confirmationRate: number;
+  restaurantHealth: number;
+  businessScore: number;
+  customerHealth: number;
+  operationalEfficiency: number;
+  revenueStability: number;
 }
 
 export function useExecutiveAIBrain(data: ExecutiveInput) {
@@ -70,61 +74,51 @@ export function useExecutiveAIBrain(data: ExecutiveInput) {
       )
     );
 
+    const restaurantHealth = Math.max(
+      0,
+      Math.min(
+        100,
+        Number(data.restaurantHealth) || 0
+      )
+    );
+
     // ==========================================
     // CORE EXECUTIVE SCORES
     // ==========================================
 
-    let healthScore = 100;
+    // Restaurant Health is calculated centrally by
+    // useRestaurantAnalytics and passed into the
+    // Executive AI Brain as the single source of truth.
+
+    const healthScore = restaurantHealth;
 
     const insights: string[] = [];
+
     const risks: string[] = [];
+
     const opportunities: string[] = [];
 
     const executiveActions: string[] = [];
+
     const executiveWarnings: string[] = [];
 
     const revenueStrategy: string[] = [];
+
     const marketingStrategy: string[] = [];
+
     const staffingStrategy: string[] = [];
+
     const customerStrategy: string[] = [];
+
     const growthStrategy: string[] = [];
 
     // ==========================================
     // HEALTH SCORE
     // ==========================================
+    // Centralized health score supplied by
+    // useRestaurantAnalytics via unifiedInsights.
+    // ==========================================
 
-    if (occupancyRate < 45) {
-      healthScore -= 25;
-    } else if (occupancyRate < 60) {
-      healthScore -= 15;
-    } else if (occupancyRate >= 85) {
-      healthScore += 5;
-    }
-
-    if (weeklyGrowth < -20) {
-      healthScore -= 20;
-    } else if (weeklyGrowth < 0) {
-      healthScore -= 10;
-    } else if (weeklyGrowth > 15) {
-      healthScore += 5;
-    }
-
-    if (cancellationRate > 25) {
-      healthScore -= 20;
-    } else if (cancellationRate > 15) {
-      healthScore -= 10;
-    }
-
-    if (confirmationRate >= 90) {
-      healthScore += 5;
-    } else if (confirmationRate < 80) {
-      healthScore -= 10;
-    }
-
-    healthScore = Math.max(
-      0,
-      Math.min(100, healthScore)
-    );
 
     // ==========================================
     // BUSINESS INSIGHTS
@@ -767,114 +761,37 @@ export function useExecutiveAIBrain(data: ExecutiveInput) {
         )
       );
 
-    const businessScore =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (
-              healthScore +
-              revenueConfidence +
-              predictedOccupancy
-            ) / 3
-          )
-        )
-      );
+    const businessScore = Math.max(
+      0,
+      Math.min(
+        100,
+        Number(data.businessScore) || 0
+      )
+    );
 
-    const customerHealth =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (
-              customerSatisfaction +
-              confirmationRate
-            ) / 2
-          )
-        )
-      );
+    const customerHealth = Math.max(
+      0,
+      Math.min(
+        100,
+        Number(data.customerHealth) || 0
+      )
+    );
 
-    const operationalEfficiency =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (
-              occupancyRate +
-              staffingStatus === "Balanced"
-                ? occupancyRate + 100
-                : occupancyRate + 80
-            ) / 2
-          )
-        )
-      );
+    const operationalEfficiency = Math.max(
+      0,
+      Math.min(
+        100,
+        Number(data.operationalEfficiency) || 0
+      )
+    );
 
-    const revenueStability =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (
-              revenueConfidence +
-              Math.max(
-                0,
-                100 - Math.abs(weeklyGrowth)
-              )
-            ) / 2
-          )
-        )
-      );
-
-    // ==========================================
-    // DEPARTMENT SCORES
-    // ==========================================
-
-    const departmentScores = {
-      kitchen: Math.max(
-        0,
-        Math.min(
-          100,
-          100 -
-            Math.max(
-              0,
-              predictedOccupancy - 80
-            )
-        )
-      ),
-
-      service: Math.max(
-        0,
-        Math.min(
-          100,
-          100 -
-            cancellationRate * 0.5
-        )
-      ),
-
-      marketing:
-        occupancyRate < 60
-          ? 70
-          : 95,
-
-      finance:
-        expectedRevenue >= 5000
-          ? 95
-          : 75,
-
-      inventory:
-        predictedOccupancy >= 85
-          ? 80
-          : 95,
-
-      frontDesk:
-        confirmationRate >= 90
-          ? 95
-          : 75,
-    };
+    const revenueStability = Math.max(
+      0,
+      Math.min(
+        100,
+        Number(data.revenueStability) || 0
+      )
+    );
 
     // ==========================================
     // BENCHMARKS
@@ -1607,25 +1524,6 @@ export function useExecutiveAIBrain(data: ExecutiveInput) {
     // ADDITIONAL COMPATIBILITY VALUES
     // ==========================================
 
-    const executivePriority =
-      predictedOccupancy < 50
-        ? "Increase marketing"
-        : predictedOccupancy > 90
-        ? "Increase staffing"
-        : "Maintain operations";
-
-    const promotionRecommendation =
-      predictedOccupancy < 55
-        ? "Run weekday promotion"
-        : "No promotion required";
-
-    const staffRecommendation =
-      predictedOccupancy > 85
-        ? "Increase staff"
-        : predictedOccupancy < 45
-        ? "Reduce shifts"
-        : "Current staffing OK";
-
     const revenueStrategyFinal =
       revenueStrategy.length > 0
         ? revenueStrategy
@@ -1672,7 +1570,6 @@ export function useExecutiveAIBrain(data: ExecutiveInput) {
       risks,
       opportunities,
 
-      executivePriority,
       executiveActions,
       executiveWarnings,
 
@@ -1710,8 +1607,6 @@ export function useExecutiveAIBrain(data: ExecutiveInput) {
 
       benchmarkResults,
       benchmarkStatus,
-
-      departmentScores,
 
       branchComparison: [
         {

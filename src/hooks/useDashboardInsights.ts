@@ -70,8 +70,6 @@ export interface DashboardInsights {
 
   // Forecast
   forecastNextWeek: DashboardForecastDay[];
-  baselineDailyReservations: number;
-  averageDailyReservations: number;
   expectedReservations: number;
   expectedGuests: number;
   forecastOccupancy: number;
@@ -83,7 +81,11 @@ export interface DashboardInsights {
   predictedRevenue: number;
   predictedReservations: number;
   occupancyForecast: number;
-  cancellationRisk: "High" | "Medium" | "Low";
+  cancellationRisk:
+  | "High"
+  | "Medium"
+  | "Low"
+  | "Insufficient data";
   aiConfidence: number;
 
   executivePriority:
@@ -132,9 +134,32 @@ export interface DashboardInsights {
   occupancyRate: number;
 }
 
+export interface DashboardCoreMetrics {
+  weeklyGrowth: number;
+  occupancyRate: number;
+  expectedReservations: number;
+  expectedGuests: number;
+  expectedRevenue: number;
+  forecastOccupancy: number;
+  recommendedStaff: number;
+  restaurantHealth: number;
+  businessScore: number;
+  customerHealth: number;
+  operationalEfficiency: number;
+  revenueStability: number;
+  revenueConfidence: number;
+  cancellationRisk:
+    | "High"
+    | "Medium"
+    | "Low"
+    | "Insufficient data";
+}
+
 export function useDashboardInsights(
-  reservations: any[]
+  reservations: any[],
+  coreMetrics?: DashboardCoreMetrics
 ): DashboardInsights {
+
   return useMemo(() => {
     const now = new Date();
     const todayStart = startOfDay(now);
@@ -179,9 +204,6 @@ export function useDashboardInsights(
         trendIcon: "TrendingUp",
 
         forecastNextWeek: [],
-
-        baselineDailyReservations: 0,
-        averageDailyReservations: 0,
 
         expectedReservations: 0,
         expectedGuests: 0,
@@ -450,15 +472,7 @@ export function useDashboardInsights(
       ).length;
 
     const weeklyGrowth =
-      previousWeekTotal === 0
-        ? 0
-        : Math.round(
-            (
-              (currentWeekTotal -
-                previousWeekTotal) /
-              previousWeekTotal
-            ) * 100
-          );
+      coreMetrics?.weeklyGrowth ?? 0;
 
     const trendDirection =
       weeklyGrowth >= 0
@@ -558,130 +572,70 @@ export function useDashboardInsights(
      * ============================================================
      */
 
-    const baselineDailyReservations =
-      currentWeekTotal > 0
-        ? currentWeekTotal / 7
-        : 0;
+    const expectedReservations =
+      coreMetrics?.expectedReservations ?? 0;
 
-    const averageDailyReservations =
-      baselineDailyReservations;
+    const expectedGuests =
+      coreMetrics?.expectedGuests ?? 0;
 
-    const averageGuestsPerReservation =
-      currentWeekTotal > 0 &&
-      currentWeekGuests > 0
-        ? Math.max(
-            1,
-            currentWeekGuests /
-              currentWeekTotal
-          )
-        : DEFAULT_GUESTS_PER_RESERVATION;
+    const recommendedStaff =
+      coreMetrics?.recommendedStaff ?? 0;
 
-    const forecastGrowth =
-      previousWeekTotal > 0
-        ? Math.max(
-            -0.2,
-            Math.min(
-              0.2,
-              weeklyGrowth / 100
-            )
-          )
-        : 0;
+    const expectedRevenue =
+      coreMetrics?.expectedRevenue ?? 0;
 
-    const forecastNextWeek =
+    const forecastNextWeek: DashboardForecastDay[] =
       Array.from(
         { length: 7 },
         (_, index) => {
-          const predicted =
-            baselineDailyReservations >
-            0
-              ? Math.max(
-                  1,
-                  Math.round(
-                    baselineDailyReservations *
-                      (1 + forecastGrowth)
-                  )
-                )
-              : 0;
-
-          const predictedGuests =
-            Math.round(
-              predicted *
-                averageGuestsPerReservation
-            );
-
           const forecastDate =
             addDays(
               now,
               index + 1
             );
 
+          const predicted =
+            expectedReservations > 0
+              ? Math.max(
+                  1,
+                  Math.round(
+                    expectedReservations / 7
+                  )
+                )
+              : 0;
+
+          const predictedGuests =
+            expectedGuests > 0
+              ? Math.max(
+                  1,
+                  Math.round(
+                    expectedGuests / 7
+                  )
+                )
+              : 0;
+
           return {
             day: format(
               forecastDate,
               "EEE"
             ),
-
             date: format(
               forecastDate,
               "yyyy-MM-dd"
             ),
-
             predicted,
-
             predictedGuests,
           };
         }
       );
 
-    const expectedReservations =
-      forecastNextWeek.reduce(
-        (sum, day) =>
-          sum + day.predicted,
-        0
-      );
-
-    const expectedGuests =
-      forecastNextWeek.reduce(
-        (sum, day) =>
-          sum + day.predictedGuests,
-        0
-      );
-
-    const recommendedStaff =
-      Math.max(
-        MIN_RECOMMENDED_STAFF,
-        Math.ceil(
-          expectedGuests / 25
-        )
-      );
-
-    const expectedRevenue =
-      Math.round(
-        expectedReservations *
-          AVERAGE_RESERVATION_VALUE
-      );
-
     /*
-     * Occupancy is based on total available
-     * seats across seven days.
-     */
+    * Occupancy forecast is based on total available
+    * seats across seven days.
+    */
 
     const forecastOccupancy =
-      Math.min(
-        100,
-        Math.max(
-          0,
-          Math.round(
-            (
-              expectedGuests /
-              (
-                RESTAURANT_SEAT_CAPACITY *
-                7
-              )
-            ) * 100
-          )
-        )
-      );
+      coreMetrics?.forecastOccupancy ?? 0;
 
     const forecastMessage =
       previousWeekTotal === 0
@@ -722,13 +676,6 @@ export function useDashboardInsights(
     const occupancyForecast =
       forecastOccupancy;
 
-    const cancellationRisk =
-      cancellationRate > 25
-        ? "High"
-        : cancellationRate > 12
-        ? "Medium"
-        : "Low";
-
     const aiConfidence =
       Math.max(
         75,
@@ -740,6 +687,9 @@ export function useDashboardInsights(
             )
         )
       );
+
+    const cancellationRisk =
+      coreMetrics?.cancellationRisk ?? "Low";
 
     const executivePriority =
       occupancyForecast < 50
@@ -825,21 +775,7 @@ export function useDashboardInsights(
         );
 
     const occupancyRate =
-      Math.min(
-        100,
-        Math.max(
-          0,
-          Math.round(
-            (
-              currentWeekConfirmedGuests /
-              (
-                RESTAURANT_SEAT_CAPACITY *
-                7
-              )
-            ) * 100
-          )
-        )
-      );
+      coreMetrics?.occupancyRate ?? 0;
 
     const utilizationRate =
       occupancyRate;
@@ -858,31 +794,10 @@ export function useDashboardInsights(
      */
 
     const restaurantHealth =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            confirmationRate * 0.5 +
-              occupancyForecast * 0.3 +
-              aiConfidence * 0.2
-          )
-        )
-      );
+      coreMetrics?.restaurantHealth ?? 0;
 
     const revenueConfidence =
-      Math.max(
-        0,
-        Math.min(
-          100,
-          Math.round(
-            (
-              aiConfidence +
-              occupancyForecast
-            ) / 2
-          )
-        )
-      );
+      coreMetrics?.revenueConfidence ?? 0;
 
     /*
      * ============================================================
@@ -1166,8 +1081,6 @@ export function useDashboardInsights(
       trendIcon,
 
       forecastNextWeek,
-      baselineDailyReservations,
-      averageDailyReservations,
       expectedReservations,
       expectedGuests,
       forecastOccupancy,

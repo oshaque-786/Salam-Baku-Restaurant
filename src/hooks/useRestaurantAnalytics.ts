@@ -102,6 +102,12 @@ export interface RestaurantAnalytics {
   recommendedStaff: number;
 
   restaurantHealth: number;
+
+  businessScore: number;
+  customerHealth: number;
+  operationalEfficiency: number;
+  revenueStability: number;
+
   aiConfidence: number;
   revenueConfidence: number;
 
@@ -294,6 +300,12 @@ export function useRestaurantAnalytics(
         recommendedStaff: 0,
 
         restaurantHealth: 0,
+
+        businessScore: 0,
+        customerHealth: 0,
+        operationalEfficiency: 0,
+        revenueStability: 0,
+
         aiConfidence: 0,
         revenueConfidence: 0,
 
@@ -1027,6 +1039,69 @@ export function useRestaurantAnalytics(
             100
           );
 
+    /**
+     * --------------------------------------------------------
+     * CENTRAL EXECUTIVE KPI SCORES
+     * --------------------------------------------------------
+     *
+     * These scores are calculated centrally so every dashboard
+     * component receives the same analytical values.
+     * --------------------------------------------------------
+     */
+
+    const businessScore =
+      clamp(
+        Math.round(
+          (
+            restaurantHealth +
+            revenueConfidence +
+            forecastOccupancy
+          ) / 3
+        ),
+        0,
+        100
+      );
+
+    const customerHealth =
+      clamp(
+        Math.round(
+          (
+            confirmationRate +
+            (100 - cancellationRate)
+          ) / 2
+        ),
+        0,
+        100
+      );
+
+    const operationalEfficiency =
+      clamp(
+        Math.round(
+          (
+            occupancyRate +
+            confirmationRate +
+            (recommendedStaff > 0 ? 100 : 0)
+          ) / 3
+        ),
+        0,
+        100
+      );
+
+    const revenueStability =
+      clamp(
+        Math.round(
+          (
+            revenueConfidence +
+            Math.max(
+              0,
+              100 - Math.abs(weeklyGrowth)
+            )
+          ) / 2
+        ),
+        0,
+        100
+      );
+
     return {
       totalReservations,
 
@@ -1061,6 +1136,12 @@ export function useRestaurantAnalytics(
       recommendedStaff,
 
       restaurantHealth,
+
+      businessScore,
+      customerHealth,
+      operationalEfficiency,
+      revenueStability,
+
       aiConfidence,
       revenueConfidence,
 

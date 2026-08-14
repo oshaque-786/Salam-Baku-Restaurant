@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import toast from "react-hot-toast";
 import { useReservations } from "../hooks/useReservations";
 import { useDashboardAnalytics } from "../hooks/useDashboardAnalytics";
+import { useRestaurantAnalytics } from "../hooks/useRestaurantAnalytics";
 import { usePagination } from "../hooks/usePagination";
 import { useDashboardStats } from "../hooks/useDashboardStats";
 import { useDashboardSettings } from "../hooks/useDashboardSettings";
@@ -288,6 +289,9 @@ export default function AdminDashboard({
     reservations
   );
 
+  const restaurantAnalytics =
+    useRestaurantAnalytics(reservations);
+
   const {
     totalReservations,
     pendingReservations,
@@ -479,13 +483,6 @@ export default function AdminDashboard({
       description: "Switch to table layout",
       action: () => setViewMode("table"),
     },
-    {
-      id: "logout",
-      group:"System",
-      title: "Logout",
-      description: "Sign out of dashboard",
-    action: handleLogout,
-    },
   ];
 
   useEffect(() => {
@@ -630,6 +627,8 @@ export default function AdminDashboard({
     searchTerm,
     statusFilter,
     dateFilter,
+    fromDate,
+    toDate,
   ]);
 
   const presetReservations = useFilterPresets(
@@ -658,42 +657,227 @@ export default function AdminDashboard({
   return stats;
 }, [filteredReservations]);
 
-const insights = useDashboardInsights(filteredReservations);
+const insights = useDashboardInsights(
+  filteredReservations,
+  {
+    weeklyGrowth:
+      restaurantAnalytics.weeklyGrowth,
+
+    occupancyRate:
+      restaurantAnalytics.occupancyRate,
+
+    expectedReservations:
+      restaurantAnalytics.expectedReservations,
+
+    expectedGuests:
+      restaurantAnalytics.expectedGuests,
+
+    expectedRevenue:
+      restaurantAnalytics.expectedRevenue,
+
+    forecastOccupancy:
+      restaurantAnalytics.forecastOccupancy,
+
+    recommendedStaff:
+      restaurantAnalytics.recommendedStaff,
+
+    restaurantHealth:
+      restaurantAnalytics.restaurantHealth,
+
+    businessScore:
+      restaurantAnalytics.businessScore,
+
+    customerHealth:
+      restaurantAnalytics.customerHealth,
+
+    operationalEfficiency:
+      restaurantAnalytics.operationalEfficiency,
+
+    revenueStability:
+      restaurantAnalytics.revenueStability,
+
+    revenueConfidence:
+      restaurantAnalytics.revenueConfidence,
+
+    cancellationRisk:
+      restaurantAnalytics.cancellationRisk,
+  }
+);
+
+const unifiedInsights = useMemo(
+  () => ({
+    ...insights,
+
+    // ==========================================
+    // CENTRAL ANALYTICS SOURCE OF TRUTH
+    // ==========================================
+
+    totalReservations:
+      restaurantAnalytics.totalReservations,
+
+    currentWeekTotal:
+      restaurantAnalytics.currentWeekTotal,
+
+    previousWeekTotal:
+      restaurantAnalytics.previousWeekTotal,
+
+    weeklyGrowth:
+      restaurantAnalytics.weeklyGrowth,
+
+    growthLabel:
+      restaurantAnalytics.growthLabel,
+
+    trendDirection:
+      restaurantAnalytics.trendDirection,
+
+    busiestDay:
+      restaurantAnalytics.busiestDay,
+
+    busiestDayReservations:
+      restaurantAnalytics.busiestDayReservations,
+
+    peakHour:
+      restaurantAnalytics.peakHour,
+
+    cancellationRate:
+      restaurantAnalytics.cancellationRate,
+
+    confirmationRate:
+      restaurantAnalytics.confirmationRate,
+
+    currentWeekGuests:
+      restaurantAnalytics.currentWeekGuests,
+
+    averageGuestsPerReservation:
+      restaurantAnalytics.averageGuestsPerReservation,
+
+    occupancyRate:
+      restaurantAnalytics.occupancyRate,
+
+    utilizationRate:
+      restaurantAnalytics.utilizationRate,
+
+    expectedReservations:
+      restaurantAnalytics.expectedReservations,
+
+    expectedGuests:
+      restaurantAnalytics.expectedGuests,
+
+    expectedRevenue:
+      restaurantAnalytics.expectedRevenue,
+
+    forecastNextWeek:
+      restaurantAnalytics.forecastNextWeek,
+
+    forecastOccupancy:
+      restaurantAnalytics.forecastOccupancy,
+
+    recommendedStaff:
+      restaurantAnalytics.recommendedStaff,
+
+    restaurantHealth:
+      restaurantAnalytics.restaurantHealth,
+
+    businessScore:
+      restaurantAnalytics.businessScore,
+
+    customerHealth:
+      restaurantAnalytics.customerHealth,
+
+    operationalEfficiency:
+      restaurantAnalytics.operationalEfficiency,
+
+    revenueStability:
+      restaurantAnalytics.revenueStability,
+
+    aiConfidence:
+      restaurantAnalytics.aiConfidence,
+
+    revenueConfidence:
+      restaurantAnalytics.revenueConfidence,
+
+    cancellationRisk:
+      restaurantAnalytics.cancellationRisk,
+
+    executivePriority:
+      restaurantAnalytics.executivePriority,
+
+    executiveInsight:
+      restaurantAnalytics.executiveInsight,
+
+    executiveDecision:
+      restaurantAnalytics.executiveDecision,
+
+    forecastMessage:
+      restaurantAnalytics.forecastMessage,
+
+    dataQuality:
+      restaurantAnalytics.dataQuality,
+
+    dataPoints:
+      restaurantAnalytics.dataPoints,
+  }),
+  [insights, restaurantAnalytics]
+);
+
 const executiveBrain =
   useExecutiveAIBrain({
     totalReservations:
-      insights.totalReservations,
+      unifiedInsights.totalReservations,
 
     expectedRevenue:
-      insights.expectedRevenue,
+      unifiedInsights.expectedRevenue,
 
     expectedGuests:
-      insights.expectedGuests,
+      unifiedInsights.expectedGuests,
 
     forecastOccupancy:
-      insights.forecastOccupancy,
+      unifiedInsights.forecastOccupancy,
 
     weeklyGrowth:
-      insights.weeklyGrowth,
+      unifiedInsights.weeklyGrowth,
 
     occupancyRate:
-      insights.occupancyRate,
+      unifiedInsights.occupancyRate,
 
     cancellationRate:
-      insights.cancellationRate,
+      unifiedInsights.cancellationRate,
 
     confirmationRate:
-      insights.confirmationRate,
+      unifiedInsights.confirmationRate,
+
+    restaurantHealth:
+      unifiedInsights.restaurantHealth,
+
+    businessScore:
+      unifiedInsights.businessScore,
+
+    customerHealth:
+      unifiedInsights.customerHealth,
+
+    operationalEfficiency:
+      unifiedInsights.operationalEfficiency,
+
+    revenueStability:
+      unifiedInsights.revenueStability,
   });
 
 const copilotDashboard = {
-  totalReservations: dashboardStats.total,
+  totalReservations: restaurantAnalytics.totalReservations,
   confirmedReservations: dashboardStats.confirmed,
   cancelledReservations: dashboardStats.cancelled,
-  expectedRevenue: insights.expectedRevenue,
-  weeklyGrowth: insights.weeklyGrowth,
-  occupancyRate: insights.occupancyRate,
-  expectedReservations: insights.expectedReservations,
+
+  expectedRevenue:
+    restaurantAnalytics.expectedRevenue,
+
+  weeklyGrowth:
+    restaurantAnalytics.weeklyGrowth,
+
+  occupancyRate:
+    restaurantAnalytics.occupancyRate,
+
+  expectedReservations:
+    restaurantAnalytics.expectedReservations,
 };
 
 const aiCommands = useMemo(
@@ -1460,7 +1644,7 @@ return (
         />
 
         <RestaurantInsights
-          insights={insights}
+          insights={unifiedInsights}
           executiveBrain={executiveBrain}
         />
 
