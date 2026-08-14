@@ -429,6 +429,8 @@ function RestaurantInsights({
           <ResponsiveContainer
             width="100%"
             height="100%"
+            minWidth={0}
+            minHeight={0}
           >
             <LineChart data={last7Days}>
 
@@ -2382,7 +2384,12 @@ function RestaurantInsights({
         </h2>
 
         <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={0}
+          >
             <AreaChart data={revenueProjection ?? []}>
               <CartesianGrid
                 strokeDasharray="3 3"
@@ -2422,7 +2429,12 @@ function RestaurantInsights({
         </h2>
 
         <div className="h-72 w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer
+            width="100%"
+            height="100%"
+            minWidth={0}
+            minHeight={0}
+          >
             <BarChart data={staffProjection ?? []}>
               <CartesianGrid
                 strokeDasharray="3 3"
