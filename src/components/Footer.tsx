@@ -82,7 +82,7 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-brand-neon shrink-0 relative top-1" />
                 <a
-                  href="https://maps.app.goo.gl/SwZaN4DNMzc6TkdE9"
+                  href="https://maps.app.goo.gl/uCg3AQYqKNPCJ4H79"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-brand-neon transition-colors leading-relaxed"
@@ -127,13 +127,13 @@ export default function Footer() {
             <h4 className="font-heading font-bold text-lg mb-6">Location</h4>
             <div className="w-full h-40 rounded-xl overflow-hidden border border-white/10 relative">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12159.269407211334!2d49.8254079!3d40.3685741!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307dd57bebde0b%3A0xfa24092a08e8a25e!2sSalam%20Baku%20Restaurant!5e0!3m2!1sen!2s!4v1786851690188!5m2!1sen!2s"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d338.52144191011485!2d49.83550382613616!3d40.36852097871312!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307dd57bebde0b%3A0xfa24092a08e8a25e!2sSalam%20Baku%20Restaurant!5e0!3m2!1sen!2s!4v1786852831295!5m2!1sen!2s"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
-                allowFullScreen={true}
+                allowFullScreen
                 loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
+                referrerPolicy="strict-origin-when-cross-origin"
               />
             </div>
             <a
