@@ -54,16 +54,6 @@ const mediaItems: MediaItem[] = [
     alt: "Salam Baku Thumbnail",
     category: "Latest" as MenuCategory,
   },
-  ...Array.from({ length: 30 }, (_, i) => {
-    const num = String(i + 1).padStart(2, "0");
-    return {
-      id: `l-auto-${num}`,
-      type: "image" as MediaType,
-      src: `/latest/${num}.jpg`,
-      alt: `Latest ${num}`,
-      category: "Latest" as MenuCategory,
-    };
-  }),
 
   // --- MENU ---
   // Menus generated up to 28 as per public/menu/README.md
@@ -137,6 +127,7 @@ const mediaItems: MediaItem[] = [
 export default function MenuHighlights() {
   const [selectedItem, setSelectedItem] = useState<MediaItem | null>(null);
   const [activeCategory, setActiveCategory] = useState<MenuCategory>("All");
+  const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
   const categories: MenuCategory[] = [
     "All",
@@ -193,8 +184,13 @@ export default function MenuHighlights() {
 
         {/* CSS Grid for the menu pages */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredMenu.map((item, idx) => (
-            <m.div
+          {filteredMenu.map((item, idx) => {
+            if (item.type === "image" && failedImages.has(item.id)) {
+              return null;
+            }
+
+            return (
+              <m.div
               key={`${item.id}-${activeCategory}`}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -209,6 +205,13 @@ export default function MenuHighlights() {
                     alt={item.alt}
                     loading="lazy"
                     decoding="async"
+                    onError={() => {
+                      setFailedImages((prev) => {
+                        const next = new Set(prev);
+                        next.add(item.id);
+                        return next;
+                      });
+                    }}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}
@@ -284,7 +287,8 @@ export default function MenuHighlights() {
                 </div>
               </div>
             </m.div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Fullscreen Media Modal */}
