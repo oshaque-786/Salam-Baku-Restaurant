@@ -82,7 +82,7 @@ export default function Footer() {
               <li className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-brand-neon shrink-0 relative top-1" />
                 <a
-                  href="https://maps.app.goo.gl/hgEPWzykDcoCggMf6"
+                  href="https://maps.app.goo.gl/SwZaN4DNMzc6TkdE9"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-brand-neon transition-colors leading-relaxed"
