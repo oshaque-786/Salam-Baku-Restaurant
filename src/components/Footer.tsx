@@ -127,7 +127,7 @@ export default function Footer() {
             <h4 className="font-heading font-bold text-lg mb-6">Location</h4>
             <div className="w-full h-40 rounded-xl overflow-hidden border border-white/10 relative">
               <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3039.4284901456314!2d49.8340156!3d40.3661111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307dab84c8a149%3A0xc4ebdef7e7161b96!2sSalam%20Baku%20Restaurant!5e0!3m2!1sen!2sae!4v1700000000000!5m2!1sen!2sae"
+                src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d12159.269407211334!2d49.8254079!3d40.3685741!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40307dd57bebde0b%3A0xfa24092a08e8a25e!2sSalam%20Baku%20Restaurant!5e0!3m2!1sen!2s!4v1786851690188!5m2!1sen!2s"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}
