@@ -67,7 +67,7 @@ const mediaItems: MediaItem[] = [
 
   // --- MENU ---
   // Menus generated up to 28 as per public/menu/README.md
-  ...Array.from({ length: 28 }, (_, i) => {
+  ...Array.from({ length: 12 }, (_, i) => {
     const num = String(i + 1).padStart(2, "0");
     return {
       id: `m-auto-${num}`,
